@@ -1,0 +1,23 @@
+{
+  "name": "ninja-app",
+  "version": "1.0.0",
+  "description": "Example application for Ninja lab",
+  "main": "index.js",
+  "scripts": {
+    "post-install": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose pull",
+    "startHLF": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose up --force-recreate",
+    "tearDownHLF": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose down && rm -rf /tmp/hfc-{k,c}vs",
+    "startApp": "node index.js",
+    "debugApp": "HFC_LOGGING='{\"debug\":\"console\"}' node index.js"
+  },
+  "author": "Arne Rutjes",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "fabric-ca-client": "1.1.0-preview",
+    "fabric-client": "1.1.0-preview",
+    "ts-node": "3.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^2.6.2"
+  }
+}
