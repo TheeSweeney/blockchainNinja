@@ -110,7 +110,7 @@ let Chaincode = class {
         // ==== Marble saved and indexed. Return success ====
         console.info('- end init marble');
 
-        return Buffer.from(marble.color);
+        return Buffer.from(JSON.stringify(marble));
     }
 
     // ===============================================

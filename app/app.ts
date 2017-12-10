@@ -1,24 +1,48 @@
 import Client = require('fabric-client');
-import {Chaincode} from './chaincode';
+import {BasicChaincodeInfo, Chaincode} from './chaincode';
 import {ChannelWrapper} from './channel-wrapper';
+import {Helper} from './helper';
+
+const CONFIG_PATH = 'test/fixtures/network.yaml';
 
 class App {
+    private helper = new Helper();
 
-    public async go(): Promise<any> {
+    /**
+     * The main function of our application. It runs when we start the app with 'node index.js'.
+     * */
+    public async start(): Promise<any> {
         const client = await this.initializeClient();
 
+        // Create and join channel, make a local representation for the sdk
         const channelWrapper = new ChannelWrapper(client);
-        await channelWrapper.initialize();
+        await channelWrapper.initialize(true);
 
-        const chaincode = new Chaincode(client, channelWrapper.channel);
+        // Update the version number to deploy
+        const mychaincode: BasicChaincodeInfo = {
+            chaincodeVersion: '1.7',
+            chaincodeId: 'mychaincode',
+            chaincodeType: 'node' as ChaicodeType // Node not yet supported in the types file
+        };
+
+        // Install and instantiate chaincode
+        const chaincode = new Chaincode(client, channelWrapper.channel, mychaincode);
         await chaincode.initialize();
 
-        const payload = await chaincode.invoke(client, channelWrapper.channel, 'initMarble', ['marble2','blue','35','tom']);
+        // We can access the invoke and query functions via the Chaincode wrapper.
+        let payload = await chaincode.invoke('initMarble', ['marble1','blue','35','tom']);
         console.log(payload);
+
+        // payload = await chaincode.query('readMarble', ['marble1']);
+        // console.log(payload);
     }
 
+    /**
+     * This prepares the fabric-client sdk by loading the configuration, initializing the credential stores and
+     * Setting the user context to an admin user.
+     */
     private async initializeClient(): Promise<Client> {
-        const client = (Client as any).loadFromConfig('test/fixtures/network.yaml');
+        const client = (Client as any).loadFromConfig(CONFIG_PATH);
         await client.initCredentialStores();
         await client.setUserContext({username:'admin', password:'adminpw'});
 
@@ -26,6 +50,6 @@ class App {
     }
 }
 
-new App().go().catch((err: Error) => {
+new App().start().catch((err: Error) => {
     console.error('Uncaught error:', err);
 });

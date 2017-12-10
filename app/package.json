@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "post-install": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose pull",
-    "startHLF": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose up --force-recreate",
-    "tearDownHLF": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose down && rm -rf /tmp/hfc-{k,c}vs",
-    "startApp": "node index.js",
+    "startHLF": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose up --force-recreate && cd ../.. && npm run tearDownHLF",
+    "tearDownHLF": "cd test/fixtures && DOCKER_IMG_TAG=:x86_64-1.1.0-preview docker-compose down && rm -rf /tmp/hfc-{k,c}vs; cd ../.. npm run clean",
+    "clean": "docker rm -f -v $(docker ps -a | grep 'dev-peer' | awk '{print $1}') 2>/dev/null; docker rmi $(docker images | grep 'dev-peer' | awk '{print $1}') 2>/dev/null",
+    "startApp": "HFC_LOGGING='{\"fatal\":\"console\"}' node index.js",
     "debugApp": "HFC_LOGGING='{\"debug\":\"console\"}' node index.js"
   },
   "author": "Arne Rutjes",

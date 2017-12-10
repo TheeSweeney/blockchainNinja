@@ -8,16 +8,17 @@ export class ChannelWrapper {
 
   public constructor(private client: Client) {}
 
-  public async initialize(): Promise<any> {
-    const FIRST_RUN = true;
-
-    if (FIRST_RUN) {
+  public async initialize(firstRun: boolean = true): Promise<any> {
+    if (firstRun) {
       await this.create();
+    } else {
+      console.log('Assuming channel is already there (firstRun set to false).');
     }
 
+    // Initialize the channel representation for the sdk.
     await this.channel.initialize();
 
-    if (FIRST_RUN) {
+    if (firstRun) {
       await this.join();
     }
   }
