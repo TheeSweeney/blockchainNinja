@@ -5,6 +5,7 @@ import {Helper} from './helper';
 
 export class ChannelWrapper {
   private helper = new Helper();
+  private channelName = 'mychannel';
 
   public constructor(private client: Client) {}
 
@@ -20,23 +21,25 @@ export class ChannelWrapper {
 
     if (firstRun) {
       await this.join();
+    } else {
+      console.log('Assuming channel is already joined (firstRun set to false).');
     }
   }
 
   public get channel(): Channel {
-    return (this.client as any).getChannel('mychannel2');
+    return (this.client as any).getChannel(this.channelName);
   }
 
   public async create(): Promise<void> {
-    const envelope_bytes = fs.readFileSync(path.join(__dirname, 'test/fixtures/channel/mychannel2.tx'));
+    const envelope_bytes = fs.readFileSync(path.join(__dirname, 'network/shared/channel-artifacts/channel.tx'));
     const config =  this.client.extractChannelConfig(envelope_bytes);
     const signatures = [this.client.signChannelConfig(config)];
     console.log('Signed channel configuration');
 
-    const request = {
+    const request: ChannelRequest = {
       config,
       signatures,
-      name : 'mychannel2',
+      name : this.channelName,
       orderer : 'orderer.example.com',
       txId  : (this.client as any).newTransactionID(true)
     };
@@ -60,12 +63,23 @@ export class ChannelWrapper {
     const channel = this.channel;
 
     let proposal: JoinChannelRequest = {
-      targets: channel.getPeers(), // TODO: remove?
+      targets: (this.client as any).getPeersForOrg(),
       block: await channel.getGenesisBlock({txId: (this.client as any).newTransactionID()}),
       txId: (this.client as any).newTransactionID(true)
     };
 
     const response: any = await this.channel.joinChannel(proposal);
-    console.log('Join channel:', response[0].message || response[0].response.message);
+
+    response.forEach((r: Error | any) => {
+      const errorMessage = r.message;
+
+      if (errorMessage) {
+        if (errorMessage.indexOf('Cannot create ledger from genesis block, due to LedgerID already exists')) {
+          console.log('Peer has already joined this channel.');
+        } else if (errorMessage.indexOf('Failed to deserialize creator identity') > -1) {
+          throw new Error(`Join channel error (are you referring to the right peer?) - ${errorMessage}`); // TODO check what this means
+        }
+      }
+    });
   }
 }

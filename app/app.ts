@@ -3,7 +3,7 @@ import {BasicChaincodeInfo, Chaincode} from './chaincode';
 import {ChannelWrapper} from './channel-wrapper';
 import {Helper} from './helper';
 
-const CONFIG_PATH = 'test/fixtures/network.yaml';
+const CONFIG_PATH = 'network/network.localhost.org2.yaml';
 
 class App {
     private helper = new Helper();
@@ -20,7 +20,7 @@ class App {
 
         // Update the version number to deploy
         const mychaincode: BasicChaincodeInfo = {
-            chaincodeVersion: '1.7',
+            chaincodeVersion: '3',
             chaincodeId: 'mychaincode',
             chaincodeType: 'node' as ChaicodeType // Node not yet supported in the types file
         };
@@ -30,11 +30,16 @@ class App {
         await chaincode.initialize();
 
         // We can access the invoke and query functions via the Chaincode wrapper.
-        let payload = await chaincode.invoke('initMarble', ['marble1','blue','35','tom']);
+        let payload = await chaincode.query('readMarble', ['marble1']);
         console.log(payload);
 
-        // payload = await chaincode.query('readMarble', ['marble1']);
-        // console.log(payload);
+        payload = await chaincode.invoke('initMarble', ['marble1','blue','35','tom']);
+        console.log(payload);
+
+        await this.helper.sleep(8000);
+
+        payload = await chaincode.query('readMarble', ['marble1']);
+        console.log(payload);
     }
 
     /**

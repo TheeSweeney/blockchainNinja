@@ -19,18 +19,17 @@ export class Chaincode {
    * If the version is different than the one passed to the constructor of this function, upgrade.
    */
   public async initialize(): Promise<any> {
-    const res = await (this.channel as any).queryInstantiatedChaincodes(this.channel.getPeers()[0], true);
-    const instantiatedChaincode: ChaincodeInfo | undefined = res.chaincodes.find((cc: ChaincodeInfo) => cc.name === this.basicChaincodeInfo.chaincodeId);
+    const instantiatedChaincode = await this.getInstantiatedChaincode();
 
-    if (instantiatedChaincode && instantiatedChaincode.version === this.basicChaincodeInfo.chaincodeVersion) {
-      console.log('Chaincode is up to date.');
+    console.log(instantiatedChaincode);
 
+    if (this.isTheInstantiatedVersionUpToDate(instantiatedChaincode)) {
       return;
     }
 
     await this.install();
 
-    if (instantiatedChaincode) {
+    if (typeof instantiatedChaincode !== 'undefined') {
       await this.upgrade();
     } else {
       await this.instantiate();
@@ -39,59 +38,65 @@ export class Chaincode {
 
   public async install(): Promise<void> {
     const request: ChaincodeInstallRequest = {
-      targets: this.channel.getPeers(),
+      targets: this.getOrgEndorsers(),
       chaincodePath: path.join(__dirname, 'chaincode'),
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };
 
-    const res = await this.client.installChaincode(request);
-    console.log('Install chaincode:', (res[0][0] as any).message || res[0][0].response.status);
+    const response = await this.client.installChaincode(request);
+
+    this.getPayloadFromResponse('Install chaincode', response);
   }
 
   public async invoke(fcn: string, args: string[]): Promise<any> {
-    const prefix = `Invoke: ${fcn} ${args}`;
+    const logPrefix = `Invoke: ${fcn} ${args}`;
 
-    const req = {
+    // We only want to send this request to endorsing peers.
+    const targets = this.getChannelEndorsers();
+    console.log(`Invoke targets: ${targets.map((p: any) => p._name).join(', ')}`);
+
+    // Build the request
+    const request: ChaincodeInvokeRequest = {
       txId: (this.client as any).newTransactionID(),
       chaincodeId: this.basicChaincodeInfo.chaincodeId,
+      targets,
       fcn,
       args
     };
 
-    const res = await this.channel.sendTransactionProposal(req);
-    let error = (res[0][0] as any).message;
-    if (error) {
-      console.log(`${prefix}. Error:`, error);
+    // Send the transaction proposal to the endorsers so they can simulate the invoke
+    const response: ProposalResponseObject = await this.channel.sendTransactionProposal(request);
 
-      return 'ERROR';
-    } else {
-      console.log(`${prefix}. Status:`, res[0][0].response.status);
-    }
+    // We keep the payload (return value) of the simulation to return in the end
+    const invokeResult = this.getPayloadFromResponse(logPrefix, response);
 
-    return res[0][0].response.payload.toString();
+    // Send the responses to the ordering service so it can carve a block and send the results to the committers.
+    const broadcastResponse: BroadcastResponse = await this.channel.sendTransaction(<any>{
+      proposalResponses: response[0],
+      proposal: response[1],
+      txId: request.txId
+    });
+
+    console.log(`${logPrefix}. Broadcast ${broadcastResponse.status}`);
+
+    return invokeResult;
   }
 
   public async query(fcn: string, args: string[]): Promise<string> {
-    const prefix = `Query: ${fcn} ${args}`;
-
-    const req = {
+    // Build the request
+    const request: ChaincodeInvokeRequest = {
       txId: (this.client as any).newTransactionID(),
       chaincodeId: this.basicChaincodeInfo.chaincodeId,
       fcn,
       args
     };
 
-    const res = await this.channel.sendTransactionProposal(req);
-    let error = (res[0][0] as any).message;
-    if (error) {
-      console.log(`${prefix}. Error:`, error);
+    // Send the transaction proposal to the endorsers so they can execute the function
+    const response: ProposalResponseObject = await this.channel.sendTransactionProposal(request);
 
-      return 'ERROR';
-    } else {
-       console.log(`${prefix}. Status:`, res[0][0].response.status);
-    }
-    
-    return res[0][0].response.payload.toString();
+    // Return the payload (return value) of the function execution. Note that we don't send anything to the orderer,
+    // so there is no transaction added to the ledger.
+    return this.getPayloadFromResponse(`Query: ${fcn} ${args}`, response);
   }
 
   public async instantiate(): Promise<any> {
@@ -108,28 +113,82 @@ export class Chaincode {
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };
 
-    let res: ProposalResponseObject;
+    let response: ProposalResponseObject;
     if (instantiateOrUpgrade === 'instantiate') {
-      res = await this.channel.sendInstantiateProposal(proposal);
+      response = await this.channel.sendInstantiateProposal(proposal);
     } else {
-      res = await (this.channel as any).sendUpgradeProposal(proposal);
+      response = await (this.channel as any).sendUpgradeProposal(proposal);
     }
 
-    let error = (res[0][0] as any).message;
-    if (error) {
-      console.log(`Chaincode ${instantiateOrUpgrade}`, error);
+    this.getPayloadFromResponse(`Chaincode ${instantiateOrUpgrade}`, response);
 
-      return;
-    }
-
-    console.log(`Chaincode ${instantiateOrUpgrade}`, res[0][0].response.message);
-    const broadcastResponse = await this.channel.sendTransaction(<any>{
-      proposalResponses: res[0],
-      proposal: res[1],
-      txId: (this.client as any).newTransactionID(true)
+    const broadcastResponse = await this.channel.sendTransaction(<any> {
+      proposalResponses: response[0],
+      proposal: response[1],
+      txId: proposal.txId
     });
 
-    console.log(`Chaincode ${instantiateOrUpgrade} broadcast:`, broadcastResponse.status);
+    console.log(`Chaincode ${instantiateOrUpgrade} broadcast ${broadcastResponse.status}`);
+
     await this.helper.sleep(10000);
+  }
+
+  private getChannelEndorsers(): Peer[] {
+    return this.channel.getPeers().filter((peer: any) => peer._roles.endorsingPeer);
+  }
+
+  private getOrgEndorsers(): Peer[] {
+    return (this.client as any).getPeersForOrg().filter((peer: any) => peer._roles.endorsingPeer);
+  }
+
+  /**
+   * Function to parse the payload (return value) out of the proposal response. This is a naive approach that doesn't
+   * handle errors and doesn't care if the responses are all the same.
+   */
+  private getPayloadFromResponse(logPrefix: string, proposalResponseObject: ProposalResponseObject): string {
+    let payload = '';
+
+    proposalResponseObject[0].forEach((r: ProposalResponse | Error, index: number) => {
+      const errorMessage = (r as Error).message;
+
+      if (errorMessage) {
+        console.log(`[${index}] ${logPrefix}. Error: ${errorMessage}`);
+
+        if (errorMessage.indexOf('cannot retrieve package for chaincode') > -1) {
+          console.log('====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization?');
+        }
+
+        if (errorMessage.indexOf('Failed to deserialize creator identity,') > -1) {
+          console.log('====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization?');
+        }
+      } else {
+        console.log(`[${index}] ${logPrefix}. ${(r as ProposalResponse).response.status}`);
+
+        payload = (r as ProposalResponse).payload.toString();
+      }
+    });
+
+    return payload;
+  }
+
+  /**
+   * Does a 'queryInstantiatedChaincodes' request for the first peer of our organization and filters out the one we have
+   * in our basicChaincodeInfo object.
+   */
+  private async getInstantiatedChaincode(): Promise<ChaincodeInfo | undefined> {
+    const instantiatedChaincodesResponse = await (this.channel as any)
+      .queryInstantiatedChaincodes((this.client as any).getPeersForOrg()[1], true);
+
+    return instantiatedChaincodesResponse.chaincodes
+      .find((cc: ChaincodeInfo) => cc.name === this.basicChaincodeInfo.chaincodeId);
+  }
+
+  private isTheInstantiatedVersionUpToDate(instantiatedChaincode: ChaincodeInfo | undefined): boolean {
+    const itsUpToDate = !!instantiatedChaincode && instantiatedChaincode.version === this.basicChaincodeInfo.chaincodeVersion;
+    if (itsUpToDate) {
+      console.log('Chaincode is up to date.');
+    }
+
+    return itsUpToDate;
   }
 }
