@@ -1,11 +1,12 @@
 # LAB 2: Chaincode
 
 ## Add a query
-> the following optional steps are if you want to work with node modules. 
+> In this lab, you can complete two optional steps (at the beginning of this document).
+These optional steps will add node modules to your project. 
 Node modules are used to highlight stub functions in certain IDE's like WebStorm.
 
 >If you complete these optional steps, develop from inside the `chaincodeDev/` folder. 
-Use `npm run startHLFWithDevEnv` to start Hyperledger Fabric with the chaincode written in `chaincodeDev/marbles_chaincode.js`
+Use `npm run startHLFWithDevEnv` to start Hyperledger Fabric with the chaincode written in __"chaincodeDev/marbles_chaincode.js"__
 #####  ___OPTIONAL:___ Go to the chaincodeDev folder inside of this project: 
 `cd app/chaincodeDev`
 ##
@@ -17,7 +18,7 @@ Functions written in the packages will be highlighted in the chaincode file afte
 ##
  
 ##### Open the file with the chaincode: 
-`marbles_chaincode.js`
+###### __"marbles_chaincode.js"__
 ##
 
 ##### Find and read trough the following function: 
@@ -32,15 +33,15 @@ Functions written in the packages will be highlighted in the chaincode file afte
 
 ##### Call the queryMarblesByColor() function from the SDK
 > In our previous lab, we worked with the SDK. Here we learned how to call chaincode functions.
-Try to add some marbles by doing some `invoke` functions from the sdk, and try to retrieve them by color using this function.
+Try to add some marbles by doing some ___Invoke___ functions from the sdk, and try to retrieve them by color using this function.
 
->Hint: if you get stuck, do the first lab (in this directory). If you already did that, check out app.ts and search for `query` or `invoke`. 
+>Hint: if you get stuck, do the first lab (in this directory). If you already did that, check out app.ts and search for ___Query___ or ___Invoke___. 
 ##
 
 ## Add an Invoke
  
 ##### Open the file with the chaincode: 
-`marbles_chaincode.js`
+######__"marbles_chaincode.js"__
 ##
 
 ##### Find and read trough the following function: 
@@ -57,12 +58,12 @@ Try to add some marbles by doing some `invoke` functions from the sdk, and try t
 > In our previous lab, we worked with the SDK. Here we learned how to call chaincode functions.
 Try to change some colors of marbles
 
->Hint: if you get stuck, do the first lab (in this directory). If you already did that, check out app.ts and search for `query` or `invoke`. 
+>Hint: if you get stuck, do the first lab (in this directory). If you already did that, check out app.ts and search for ___Query___ or ___Invoke___. 
 ##
 
 ## Bonus exercise
 ##### Make sure that the chaincode throws an error if you try to paint the marble in the same color that it already has
 ###### example: If you paint a green marble green throw an error
 
-> call this function by using the sdk. try to get the error printed out in `Kitematic`.
+> call this function by using the sdk. try to get the error printed out in ___Kitematic___.
 
