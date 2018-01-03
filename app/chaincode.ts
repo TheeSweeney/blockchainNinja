@@ -8,6 +8,11 @@ export interface BasicChaincodeInfo {
   chaincodeType: ChaicodeType;
 }
 
+var logEnum = {
+  warningPrefix: '\x1b[33m[Warning] ',
+  errorPrefix: '\x1b[31m[Error] '
+};
+
 export class Chaincode {
   private helper = new Helper();
 
@@ -21,12 +26,11 @@ export class Chaincode {
   public async initialize(): Promise<any> {
     const instantiatedChaincode = await this.getInstantiatedChaincode();
 
-    console.log(instantiatedChaincode);
-
     if (this.isTheInstantiatedVersionUpToDate(instantiatedChaincode)) {
       return;
     }
 
+    console.log('Going to install chaincode...');
     await this.install();
 
     if (typeof instantiatedChaincode !== 'undefined') {
@@ -44,7 +48,6 @@ export class Chaincode {
     };
 
     const response = await this.client.installChaincode(request);
-
     this.getPayloadFromResponse('Install chaincode', response);
   }
 
@@ -66,20 +69,25 @@ export class Chaincode {
 
     // Send the transaction proposal to the endorsers so they can simulate the invoke
     const response: ProposalResponseObject = await this.channel.sendTransactionProposal(request);
+    let invokeResult: any;
 
     // We keep the payload (return value) of the simulation to return in the end
-    const invokeResult = this.getPayloadFromResponse(logPrefix, response);
+    invokeResult = this.getPayloadFromResponse(logPrefix, response);
 
     // Send the responses to the ordering service so it can carve a block and send the results to the committers.
-    const broadcastResponse: BroadcastResponse = await this.channel.sendTransaction(<any>{
-      proposalResponses: response[0],
-      proposal: response[1],
-      txId: request.txId
-    });
+    try {
+      const broadcastResponse: BroadcastResponse = await this.channel.sendTransaction(<any>{
+        proposalResponses: response[0],
+        proposal: response[1],
+        txId: request.txId
+      });
 
-    console.log(`${logPrefix}. Broadcast ${broadcastResponse.status}`);
+      console.log(`${logPrefix}. Broadcast ${broadcastResponse.status}`);
 
-    return invokeResult;
+      return invokeResult;
+    } catch (err) {
+      return '\n' + logEnum.errorPrefix + 'Error Occurred. Reason: ' + err.message + '\x1b[0m';
+    }
   }
 
   public async query(fcn: string, args: string[]): Promise<string> {
@@ -108,12 +116,15 @@ export class Chaincode {
   }
 
   private async instantiateOrUpgradeChaincode(instantiateOrUpgrade: 'instantiate' | 'upgrade'): Promise<any> {
+    console.log(`Going to ${instantiateOrUpgrade} chaincode (this may take a minute)...`);
+
     const proposal: ChaincodeInstantiateUpgradeRequest = {
       txId: (this.client as any).newTransactionID(true),
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };
 
     let response: ProposalResponseObject;
+
     if (instantiateOrUpgrade === 'instantiate') {
       response = await this.channel.sendInstantiateProposal(proposal);
     } else {
@@ -155,16 +166,23 @@ export class Chaincode {
         console.log(`[${index}] ${logPrefix}. Error: ${errorMessage}`);
 
         if (errorMessage.indexOf('cannot retrieve package for chaincode') > -1) {
-          console.log('====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization?');
+          console.log(logEnum.warningPrefix + '====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization? \x1b[0m');
         }
 
         if (errorMessage.indexOf('Failed to deserialize creator identity,') > -1) {
-          console.log('====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization?');
+          console.log(logEnum.warningPrefix + '====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization? \x1b[0m');
+        }
+
+        if (errorMessage.indexOf('Failed to paint marble with id:') > -1) {
+          console.log(logEnum.errorPrefix + 'The marble is already green \x1b[0m');
+        }
+
+        if (errorMessage.indexOf('This marble already exists:') > -1) {
+          console.log(logEnum.errorPrefix +'This marble is already created \x1b[0m');
         }
       } else {
         console.log(`[${index}] ${logPrefix}. ${(r as ProposalResponse).response.status}`);
-
-        payload = (r as ProposalResponse).payload.toString();
+        payload = (r as ProposalResponse).response.payload.toString('utf8');
       }
     });
 
