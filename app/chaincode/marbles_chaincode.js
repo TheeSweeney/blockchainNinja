@@ -149,10 +149,8 @@ let Chaincode = class {
         }
         // to maintain the color~name index, we need to read the marble first and get its color
         let valAsbytes = await stub.getState(marbleName); //get the marble from chaincode state
-        let jsonResp = {};
         if (!valAsbytes) {
-            jsonResp.error = 'marble does not exist: ' + name;
-            throw new Error(jsonResp);
+            throw new Error('marble does not exist: ' + name);
         }
         let marbleJSON = {};
         try {
