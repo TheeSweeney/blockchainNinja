@@ -48,19 +48,19 @@ export class Chaincode {
     this.getPayloadFromResponse('Install chaincode', response);
   }
 
-  public async invoke(fcn: string, args: string[]): Promise<any> {
-    const logPrefix = `Invoke: ${fcn} ${args}`;
+  public async invoke(functionName: string, args: string[]): Promise<any> {
+    const logPrefix = `Invoke: ${functionName} ${args}`;
 
     // We only want to send this request to endorsing peers.
     const targets = this.getChannelEndorsers();
-    console.log(`Invoke targets: ${targets.map((p: any) => p._name).join(', ')}`);
+    console.log(`Invoke targets: ${targets.map((peer: any) => peer._name).join(', ')}`);
 
     // Build the request
     const request: ChaincodeInvokeRequest = {
       txId: (this.client as any).newTransactionID(),
       chaincodeId: this.basicChaincodeInfo.chaincodeId,
       targets,
-      fcn,
+      fcn: functionName,
       args
     };
 
@@ -82,12 +82,12 @@ export class Chaincode {
     return invokeResult;
   }
 
-  public async query(fcn: string, args: string[]): Promise<string> {
+  public async query(functionName: string, args: string[]): Promise<string> {
     // Build the request
     const request: ChaincodeInvokeRequest = {
       txId: (this.client as any).newTransactionID(),
       chaincodeId: this.basicChaincodeInfo.chaincodeId,
-      fcn,
+      fcn: functionName,
       args
     };
 
@@ -96,7 +96,7 @@ export class Chaincode {
 
     // Return the payload (return value) of the function execution. Note that we don't send anything to the orderer,
     // so there is no transaction added to the ledger.
-    return this.getPayloadFromResponse(`Query: ${fcn} ${args}`, response);
+    return this.getPayloadFromResponse(`Query: ${functionName} ${args}`, response);
   }
 
   public async instantiate(): Promise<any> {
@@ -148,8 +148,8 @@ export class Chaincode {
   private getPayloadFromResponse(logPrefix: string, proposalResponseObject: ProposalResponseObject): string {
     let payload = '';
 
-    proposalResponseObject[0].forEach((r: ProposalResponse | Error, index: number) => {
-      const errorMessage = (r as Error).message;
+    proposalResponseObject[0].forEach((response: ProposalResponse | Error, index: number) => {
+      const errorMessage = (response as Error).message;
 
       if (errorMessage) {
         console.log(`[${index}] ${logPrefix}. Error: ${errorMessage}`);
@@ -162,9 +162,9 @@ export class Chaincode {
           console.log('====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization?');
         }
       } else {
-        console.log(`[${index}] ${logPrefix}. ${(r as ProposalResponse).response.status}`);
+        console.log(`[${index}] ${logPrefix}. ${(response as ProposalResponse).response.status}`);
 
-        payload = (r as ProposalResponse).payload.toString();
+        payload = (response as ProposalResponse).payload.toString();
       }
     });
 

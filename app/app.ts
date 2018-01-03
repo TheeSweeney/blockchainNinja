@@ -30,16 +30,8 @@ class App {
         await chaincode.initialize();
 
         // We can access the invoke and query functions via the Chaincode wrapper.
-        let payload = await chaincode.query('readMarble', ['marble1']);
-        console.log(payload);
-
-        payload = await chaincode.invoke('initMarble', ['marble1','blue','35','tom']);
-        console.log(payload);
-
-        await this.helper.sleep(8000);
-
-        payload = await chaincode.query('readMarble', ['marble1']);
-        console.log(payload);
+        // let payload = await chaincode.query('readMarble', ['marble1']);
+        // console.log(payload);
     }
 
     /**

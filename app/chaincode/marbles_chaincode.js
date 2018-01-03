@@ -65,7 +65,7 @@ let Chaincode = class {
             throw new Error('Incorrect number of arguments. Expecting 4');
         }
         // ==== Input sanitation ====
-        console.info('--- start init marble ---')
+        console.info('--- start init marble ---');
         if (args[0].length <= 0) {
             throw new Error('1st argument must be a non-empty string');
         }
@@ -102,7 +102,7 @@ let Chaincode = class {
 
         // === Save marble to state ===
         await stub.putState(marbleName, Buffer.from(JSON.stringify(marble)));
-        let indexName = 'color~name'
+        let indexName = 'color~name';
         let colorNameIndexKey = await stub.createCompositeKey(indexName, [marble.color, marble.name]);
         console.info(colorNameIndexKey);
         //  Save index entry to state. Only the key name is needed, no need to store a duplicate copy of the marble.
@@ -122,15 +122,13 @@ let Chaincode = class {
             throw new Error('Incorrect number of arguments. Expecting name of the marble to query');
         }
 
-        let name = args[0];
-        if (!name) {
+        let marbleName = args[0];
+        if (!marbleName) {
             throw new Error(' marble name must not be empty');
         }
-        let marbleAsbytes = await stub.getState(name); //get the marble from chaincode state
+        let marbleAsbytes = await stub.getState(marbleName); //get the marble from chaincode state
         if (!marbleAsbytes.toString()) {
-            let jsonResp = {};
-            jsonResp.Error = 'Marble does not exist: ' + name;
-            throw new Error(JSON.stringify(jsonResp));
+            throw new Error('Marble does not exist: ' + marbleName);
         }
         console.info('=======================================');
         console.log(marbleAsbytes.toString());
@@ -160,9 +158,7 @@ let Chaincode = class {
         try {
             marbleJSON = JSON.parse(valAsbytes.toString());
         } catch (err) {
-            jsonResp = {};
-            jsonResp.error = 'Failed to decode JSON of: ' + marbleName;
-            throw new Error(jsonResp);
+            throw new Error('Failed to decode JSON of: ' + marbleName + '. Reason: ' + err.message);
         }
 
         await stub.deleteState(marbleName); //remove the marble from chaincode state
@@ -199,9 +195,7 @@ let Chaincode = class {
         try {
             marbleToTransfer = JSON.parse(marbleAsBytes.toString()); //unmarshal
         } catch (err) {
-            let jsonResp = {};
-            jsonResp.error = 'Failed to decode JSON of: ' + marbleName;
-            throw new Error(jsonResp);
+          throw new Error('Failed to decode JSON of: ' + marbleName + '. Reason: ' + err.message);
         }
         console.info(marbleToTransfer);
         marbleToTransfer.owner = newOwner; //change the owner
@@ -313,8 +307,7 @@ let Chaincode = class {
         queryString.selector.docType = 'marble';
         queryString.selector.owner = owner;
         let method = thisClass['getQueryResultForQueryString'];
-        let queryResults = await method(stub, JSON.stringify(queryString), thisClass);
-        return queryResults; //shim.success(queryResults);
+        return await method(stub, JSON.stringify(queryString), thisClass); //shim.success(queryResults);
     }
 
     // ===== Example: Ad hoc rich query ========================================================
@@ -335,8 +328,7 @@ let Chaincode = class {
             throw new Error('queryString must not be empty');
         }
         let method = thisClass['getQueryResultForQueryString'];
-        let queryResults = await method(stub, queryString, thisClass);
-        return queryResults;
+        return await method(stub, queryString, thisClass);
     }
 
     async getAllResults(iterator, isHistory) {
@@ -384,7 +376,7 @@ let Chaincode = class {
     // =========================================================================================
     async getQueryResultForQueryString(stub, queryString, thisClass) {
 
-        console.info('- getQueryResultForQueryString queryString:\n' + queryString)
+        console.info('- getQueryResultForQueryString queryString:\n' + queryString);
         let resultsIterator = await stub.getQueryResult(queryString);
         let method = thisClass['getAllResults'];
 
