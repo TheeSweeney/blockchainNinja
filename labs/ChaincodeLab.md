@@ -50,7 +50,7 @@ Try to add some marbles by doing some ___Invoke___ functions from the sdk, and t
 ##
 
 ##### Make an invoke function called paintMarble
-> this function should change the color of a certain marble to a color of your choise.
+> this function should change the color of a certain marble to a color of your choice.
 
  > Hint: if you get stuck compare your code to the `transferMarble()` function.
 
