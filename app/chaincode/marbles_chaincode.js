@@ -219,7 +219,7 @@ let Chaincode = class {
   async paintMarble(stub, args, thisClass) {
     //   0       1
     // 'name', 'color'
-    if (args.length < 2) {
+    if (args.length !== 2) {
       throw new Error('Incorrect number of arguments. Expecting marblename and owner')
     }
 
@@ -235,7 +235,7 @@ let Chaincode = class {
     try {
       marbleToPaint = JSON.parse(marbleAsBytes.toString()); //unmarshal
     } catch (err) {
-      throw new Error('Failed to decode JSON of: ' + marbleName + '. Reason: ' + err);
+      throw new Error('Failed to decode JSON of: ' + marbleName + '. Reason: ' + err.message);
     }
 
     console.info(marbleToPaint);
@@ -249,7 +249,7 @@ let Chaincode = class {
     let marbleJSONasBytes = Buffer.from(JSON.stringify(marbleToPaint));
     await stub.putState(marbleName, marbleJSONasBytes); //rewrite the marble
 
-    console.info('- end transferMarble (success)');
+    console.info('- end paintMarble (success)');
     return marbleJSONasBytes;
   }
 
