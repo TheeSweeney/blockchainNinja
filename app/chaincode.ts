@@ -5,10 +5,10 @@ import {Helper} from './helper';
 export interface BasicChaincodeInfo {
   chaincodeId: string;
   chaincodeVersion: string;
-  chaincodeType: ChaicodeType;
+  chaincodeType: ChaincodeType;
 }
 
-var logEnum = {
+const logEnum = {
   warningPrefix: '\x1b[33m[Warning] ',
   errorPrefix: '\x1b[31m[Error] '
 };
@@ -47,7 +47,7 @@ export class Chaincode {
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };
 
-    const response = await this.client.installChaincode(request);
+    const response = await this.client.installChaincode(request, 30);
     this.getPayloadFromResponse('Install chaincode', response);
   }
 
@@ -163,7 +163,7 @@ export class Chaincode {
       const errorMessage = (r as Error).message;
 
       if (errorMessage) {
-        console.log(`[${index}] ${logPrefix}. Error: ${errorMessage}`);
+        console.log(logEnum.warningPrefix +`[${index}] ${logPrefix}. Error: ${errorMessage} \x1b[0m`);
 
         if (errorMessage.indexOf('cannot retrieve package for chaincode') > -1) {
           console.log(logEnum.warningPrefix + '====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization? \x1b[0m');
@@ -171,14 +171,6 @@ export class Chaincode {
 
         if (errorMessage.indexOf('Failed to deserialize creator identity,') > -1) {
           console.log(logEnum.warningPrefix + '====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization? \x1b[0m');
-        }
-
-        if (errorMessage.indexOf('Failed to paint marble with id:') > -1) {
-          console.log(logEnum.errorPrefix + 'The marble is already green \x1b[0m');
-        }
-
-        if (errorMessage.indexOf('This marble already exists:') > -1) {
-          console.log(logEnum.errorPrefix +'This marble is already created \x1b[0m');
         }
       } else {
         console.log(`[${index}] ${logPrefix}. ${(r as ProposalResponse).response.status}`);

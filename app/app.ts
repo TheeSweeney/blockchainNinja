@@ -3,7 +3,7 @@ import {BasicChaincodeInfo, Chaincode} from './chaincode';
 import {ChannelWrapper} from './channel-wrapper';
 import {Helper} from './helper';
 
-const CONFIG_PATH = 'network/network.localhost.org2.yaml';
+const CONFIG_PATH = 'network/network.localhost.org1.yaml';
 
 class App {
   private helper = new Helper();
@@ -22,7 +22,7 @@ class App {
     const mychaincode: BasicChaincodeInfo = {
       chaincodeVersion: '3',
       chaincodeId: 'mychaincode',
-      chaincodeType: 'node' as ChaicodeType // Node not yet supported in the types file
+      chaincodeType: 'node' // Node not yet supported in the types file
     };
 
     // Install and instantiate chaincode
