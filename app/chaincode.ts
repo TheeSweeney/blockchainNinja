@@ -5,7 +5,7 @@ import {Helper} from './helper';
 export interface BasicChaincodeInfo {
   chaincodeId: string;
   chaincodeVersion: string;
-  chaincodeType: ChaincodeType;
+  chaincodeType: ChaicodeType;
 }
 
 const logEnum = {
@@ -47,7 +47,7 @@ export class Chaincode {
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };
 
-    const response = await this.client.installChaincode(request, 30);
+    const response = await this.client.installChaincode(request);
     this.getPayloadFromResponse('Install chaincode', response);
   }
 
