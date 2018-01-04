@@ -48,7 +48,7 @@ let Chaincode = class {
       throw new Error('Received unknown function ' + ret.fcn + ' invocation');
     }
     try {
-      let payload = await method(stub, ret.params, this);
+      let payload = await method.apply(this, [stub, ret.params]);
       console.log(payload.toString());
       return shim.success(payload);
     } catch (err) {
@@ -355,7 +355,7 @@ let Chaincode = class {
     queryString.selector.docType = 'marble';
     queryString.selector.owner = owner;
 
-    return await this.getQueryResultForQueryString(stub, JSON.stringify(queryString), thisClass);
+    return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
   }
 
   // ===== SOLUTION: Query Marble By Color =================================================
@@ -365,18 +365,17 @@ let Chaincode = class {
   async queryMarblesByColor(stub, args, thisClass) {
     //   0
     // 'bob'
-    if (args.length < 1) {
+    if (args.length !== 1) {
       throw new Error('Incorrect number of arguments. Expecting a color.');
     }
 
     let color = args[0].toLowerCase();
     let queryString = {};
-
     queryString.selector = {};
     queryString.selector.docType = 'marble';
     queryString.selector.color = color;
 
-    return await this.getQueryResultForQueryString(stub, JSON.stringify(queryString), thisClass);
+    return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
   }
 
   // ===== Example: Ad hoc rich query ========================================================
@@ -445,13 +444,11 @@ let Chaincode = class {
   // getQueryResultForQueryString executes the passed in query string.
   // Result set is built and returned as a byte array containing the JSON results.
   // =========================================================================================
-  async getQueryResultForQueryString(stub, queryString, thisClass) {
-
+  async getQueryResultForQueryString(stub, queryString) {
     console.info('- getQueryResultForQueryString queryString:\n' + queryString);
-    let resultsIterator = await stub.getQueryResult(queryString);
-    let method = thisClass['getAllResults'];
 
-    let results = await method(resultsIterator, false);
+    let resultsIterator = await stub.getQueryResult(queryString);
+    let results = await this.getAllResults(resultsIterator, false);
 
     return Buffer.from(JSON.stringify(results));
   }
