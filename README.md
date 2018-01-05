@@ -1,9 +1,8 @@
 # Blockchain Ninja labs
-
-## Get started
 This repository contains labs for the IBM Blockchain Ninja Course (see the Developer Track on [iSPO](http://gbslearn.atlanta.ibm.com/iSPO/blockchain/)).
 
-To get started, clone this repository:  
+## Get started
+Clone this repository:  
 ```bash
 git clone git@github.ibm.com:CICBlockchain/ninja-course.git
 ```

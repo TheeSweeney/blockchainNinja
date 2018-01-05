@@ -13,7 +13,7 @@ const logEnum = {
   errorPrefix: '\x1b[31m[Error] '
 };
 
-export class Chaincode {
+export class ChaincodeWrapper {
   private helper = new Helper();
 
   public constructor(private client: Client, private channel: Channel, private basicChaincodeInfo: BasicChaincodeInfo) {
