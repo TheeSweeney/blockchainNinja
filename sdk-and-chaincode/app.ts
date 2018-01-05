@@ -2,7 +2,7 @@ import Client = require('fabric-client');
 import {BasicChaincodeInfo, ChaincodeWrapper} from './chaincode-wrapper';
 import {ChannelWrapper} from './channel-wrapper';
 import {Helper} from './helper';
-import * as path from "path";
+import * as path from 'path';
 
 const CONFIG_PATH = 'network/network.localhost.org1.yaml';
 
@@ -24,7 +24,7 @@ class App {
       chaincodeVersion: '3',
       chaincodeId: 'mychaincode',
       chaincodePath: path.join(__dirname, 'chaincode', 'javascript'),
-      chaincodeType: ('node' as ChaicodeType) // Node not yet supported in the types file
+      chaincodeType: 'node' as ChaicodeType // Node not yet supported in the types file
     };
 
     // Install and instantiate chaincode
