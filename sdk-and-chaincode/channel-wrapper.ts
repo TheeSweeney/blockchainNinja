@@ -36,7 +36,7 @@ export class ChannelWrapper {
     const signatures = [this.client.signChannelConfig(config)];
     console.log('Signed channel configuration');
 
-    const request: ChannelRequest = {
+    const request: ChannelRequest | any = {
       config,
       signatures,
       name : this.channelName,

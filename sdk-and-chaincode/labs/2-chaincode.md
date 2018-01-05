@@ -1,4 +1,4 @@
-# LAB 2: Chaincode
+# Lab 2: Chaincode
 
 ## Add a query
 <!-- In this lab, you can complete two optional steps (at the beginning of this document).

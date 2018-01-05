@@ -1,10 +1,10 @@
 import Client = require('fabric-client');
-import {BasicChaincodeInfo, Chaincode} from './chaincode';
+import {BasicChaincodeInfo, ChaincodeWrapper} from './chaincode-wrapper';
 import {ChannelWrapper} from './channel-wrapper';
 import {Helper} from './helper';
 import * as path from "path";
 
-const CONFIG_PATH = 'network/network.localhost.org2.yaml';
+const CONFIG_PATH = 'network/network.localhost.org1.yaml';
 
 class App {
   private helper = new Helper();
@@ -23,12 +23,12 @@ class App {
     const mychaincode: BasicChaincodeInfo = {
       chaincodeVersion: '3',
       chaincodeId: 'mychaincode',
-      chaincodePath: path.join(__dirname, 'chaincode', 'typescript'),
+      chaincodePath: path.join(__dirname, 'chaincode', 'javascript'),
       chaincodeType: ('node' as ChaicodeType) // Node not yet supported in the types file
     };
 
     // Install and instantiate chaincode
-    const chaincode = new Chaincode(client, channelWrapper.channel, mychaincode);
+    const chaincode = new ChaincodeWrapper(client, channelWrapper.channel, mychaincode);
     await chaincode.initialize();
 
     // We can access the invoke and query functions via the Chaincode wrapper.
