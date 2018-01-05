@@ -23,7 +23,7 @@ class App {
     const mychaincode: BasicChaincodeInfo = {
       chaincodeVersion: '3',
       chaincodeId: 'mychaincode',
-      chaincodePath: path.join(__dirname, 'chaincode', 'javascript'),
+      chaincodePath: path.join(__dirname, 'chaincode', 'typescript'),
       chaincodeType: ('node' as ChaicodeType) // Node not yet supported in the types file
     };
 
