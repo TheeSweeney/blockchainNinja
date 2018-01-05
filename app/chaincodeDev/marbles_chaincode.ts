@@ -301,7 +301,7 @@ class Chaincode {
   // committing peers if the result set has changed between endorsement time and commit time.
   // Therefore, range queries are a safe option for performing update transactions based on query results.
   // ===========================================================================================
-  private async transferMarblesBasedOnColor(stub: any, args: any[]): Promise<any> {
+  private async transferMarblesBasedOnColor(stub: any, args: any[]): Promise<void> {
     if (args.length !== 2) {
       throw new Error('Incorrect number of arguments. Expecting color and owner');
     }
@@ -336,7 +336,7 @@ class Chaincode {
 
       // Now call the transfer function for the found marble.
       // Re-use the same function that is used to transfer individual marbles
-      return await this.transferMarble(stub, [returnedMarbleName, newOwner]);
+      await this.transferMarble(stub, [returnedMarbleName, newOwner]);
     }
   }
 
