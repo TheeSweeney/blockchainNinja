@@ -1,10 +1,10 @@
 import Client = require('fabric-client');
-import * as path from 'path';
 import {Helper} from './helper';
 
 export interface BasicChaincodeInfo {
   chaincodeId: string;
   chaincodeVersion: string;
+  chaincodePath: string;
   chaincodeType: ChaicodeType;
 }
 
@@ -43,7 +43,6 @@ export class Chaincode {
   public async install(): Promise<void> {
     const request: ChaincodeInstallRequest = {
       targets: this.getOrgEndorsers(),
-      chaincodePath: path.join(__dirname, 'chaincode'),
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };
 
@@ -118,7 +117,7 @@ export class Chaincode {
   private async instantiateOrUpgradeChaincode(instantiateOrUpgrade: 'instantiate' | 'upgrade'): Promise<any> {
     console.log(`Going to ${instantiateOrUpgrade} chaincode (this may take a minute)...`);
 
-    const proposal: ChaincodeInstantiateUpgradeRequest = {
+    const proposal: any = {
       txId: (this.client as any).newTransactionID(true),
       ...this.basicChaincodeInfo // Take the fields from basicChaincodeInfo and add them to the request.
     };

@@ -3,5 +3,5 @@ export interface Marble {
   color: string;
   size: number;
   owner: string;
-  creationDate: number;
+  creationDate: any;
 }

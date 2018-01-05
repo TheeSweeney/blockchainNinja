@@ -4,25 +4,6 @@
  # SPDX-License-Identifier: Apache-2.0
  */
 
-// ====CHAINCODE EXECUTION SAMPLES (CLI) ==================
-
-// ==== Invoke marbles ====
-// peer chaincode invoke -C myc1 -n marbles -c '{"Args":["initMarble","marble1","blue","35","tom"]}'
-// peer chaincode invoke -C myc1 -n marbles -c '{"Args":["initMarble","marble2","red","50","tom"]}'
-// peer chaincode invoke -C myc1 -n marbles -c '{"Args":["initMarble","marble3","blue","70","tom"]}'
-// peer chaincode invoke -C myc1 -n marbles -c '{"Args":["transferMarble","marble2","jerry"]}'
-// peer chaincode invoke -C myc1 -n marbles -c '{"Args":["transferMarblesBasedOnColor","blue","jerry"]}'
-// peer chaincode invoke -C myc1 -n marbles -c '{"Args":["delete","marble1"]}'
-
-// ==== Query marbles ====
-// peer chaincode query -C myc1 -n marbles -c '{"Args":["readMarble","marble1"]}'
-// peer chaincode query -C myc1 -n marbles -c '{"Args":["getMarblesByRange","marble1","marble3"]}'
-// peer chaincode query -C myc1 -n marbles -c '{"Args":["getHistoryForMarble","marble1"]}'
-
-// Rich Query (Only supported if CouchDB is used as state database):
-//   peer chaincode query -C myc1 -n marbles -c '{"Args":["queryMarblesByOwner","tom"]}'
-//   peer chaincode query -C myc1 -n marbles -c '{"Args":["queryMarbles","{\"selector\":{\"owner\":\"tom\"}}"]}'
-
 'use strict';
 import {Marble} from './models/marble.interface';
 import {QueryString} from './models/queryString.interface';
@@ -36,6 +17,7 @@ class Chaincode {
     let ret = stub.getFunctionAndParameters();
     console.info(ret);
     console.info('=========== Instantiated Marbles Chaincode ===========');
+    console.info('=========== Running Chaincode in TypeScript ===========');
 
     return shim.success();
   }
@@ -101,12 +83,13 @@ class Chaincode {
   }
 
   // ===============================================
-  // initMarble - create a new marble
+  // initMarble - Create a new Marble
   // ===============================================
   private async initMarble(stub: any, args: string[]): Promise<Buffer> {
-    if (args.length != 4) {
+    if (args.length !== 4) {
       throw new Error('Incorrect number of arguments. Expecting 4');
     }
+
     // ==== Input sanitation ====
     console.info('--- start init marble ---');
 
@@ -120,7 +103,8 @@ class Chaincode {
       name: args[0],
       color: args[1].toLowerCase(),
       size: parseInt(args[2]),
-      owner: args[3].toLowerCase()
+      owner: args[3].toLowerCase(),
+      creationDate: stub.getTxTimestamp()
     };
 
     if (typeof marble.size !== 'number') {
@@ -130,7 +114,7 @@ class Chaincode {
     // ==== Check if marble already exists ====
     let marbleState = await stub.getState(marble.name);
     if (marbleState.toString()) {
-      throw new Error('This marble already exists: ' + marble.name);
+      throw new Error('Marble "' + marble.name + '" already exists');
     }
 
     // === Put marble as a JSON string in a buffer and save the marble to state ===
@@ -141,8 +125,9 @@ class Chaincode {
     let colorNameIndexKey = await stub.createCompositeKey(indexName, [marble.color, marble.name]);
     console.info(colorNameIndexKey);
 
-    //  Note - passing a 'nil' value will effectively delete the key from state, therefore we pass null character as value
+    //  Note - Passing a 'nil' value will effectively delete the key from state, therefore we pass null character as value
     await stub.putState(colorNameIndexKey, Buffer.from('\u0000'));
+
     // ==== Marble saved and indexed. Return success ====
     console.info('- end init marble');
 
@@ -150,10 +135,10 @@ class Chaincode {
   }
 
   // ===============================================
-  // readMarble - read a marble from chaincode state
+  // readMarble - Read a marble from Chaincode state
   // ===============================================
   private async readMarble(stub: any, args: string[]): Promise<Buffer> {
-    if (args.length != 1) {
+    if (args.length !== 1) {
       throw new Error('Incorrect number of arguments. Expecting name of the marble to query');
     }
 
@@ -162,7 +147,7 @@ class Chaincode {
       throw new Error(' marble name must not be empty');
     }
 
-    let marbleAsbytes: Buffer = await stub.getState(marbleName); //get the marble from chaincode state
+    let marbleAsbytes: Buffer = await stub.getState(marbleName); //get the marble from Chaincode state
     if (!marbleAsbytes.toString()) {
       throw new Error('Marble does not exist: ' + marbleName);
     }
@@ -171,19 +156,20 @@ class Chaincode {
   }
 
   // ==================================================
-  // delete - remove a marble key/value pair from state
+  // delete - Remove a marble key/value pair from state
   // ==================================================
   private async delete(stub: any, args: string[]): Promise<void> {
-    if (args.length != 1) {
-      throw new Error('Incorrect number of arguments. Expecting name of the Marble to delete.');
+    if (args.length !== 1) {
+      throw new Error('Incorrect number of arguments. Expecting name of the marble to delete.');
     }
 
     let marbleName: string = args[0];
     if (!marbleName) {
       throw new Error('Marble name must not be empty.');
     }
-    // to maintain the color~name index, we need to read the marble first and get its color
-    let valAsbytes: number = await stub.getState(marbleName); //get the marble from chaincode state
+
+    // To maintain the color~name index, we need to read the marble first and get its color
+    let valAsbytes: number = await stub.getState(marbleName); //get the marble from Chaincode state
     if (!valAsbytes) {
       throw new Error('Marble "' + marbleName + '" does not exist.');
     }
@@ -196,13 +182,13 @@ class Chaincode {
       throw new Error('Failed to decode JSON of: ' + marbleName + '. Error message: ' + err.message);
     }
 
-    await stub.deleteState(marbleName); //remove the marble from chaincode state
+    await stub.deleteState(marbleName); //remove the marble from Chaincode state
 
-    // delete the index
+    // Delete the index
     let indexName: string = 'color~name';
     let colorNameIndexKey: any = stub.createCompositeKey(indexName, [marbleJSON.color, marbleJSON.name]);
     if (!colorNameIndexKey) {
-      throw new Error(' Failed to create the createCompositeKey');
+      throw new Error('Failed to create the createCompositeKey');
     }
 
     //  Delete index entry to state.
@@ -210,11 +196,11 @@ class Chaincode {
   }
 
   // ===========================================================
-  // transfer a marble by setting a new owner name on the marble
+  // transfer marble by setting a new owner for the marble
   // ===========================================================
   private async transferMarble(stub: any, args: string[]): Promise<void> {
     if (args.length !== 2) {
-      throw new Error('Incorrect number of arguments. Expecting marblename and owner');
+      throw new Error('Incorrect number of arguments. Expecting marbleName and owner');
     }
 
     let marbleName: string = args[0];
@@ -234,22 +220,22 @@ class Chaincode {
       throw new Error('Failed to decode JSON of: ' + marbleName + '. Reason: ' + err.message);
     }
 
-    marbleToTransfer.owner = newOwner;
+    marbleToTransfer.owner = newOwner; // change owner
     console.info(marbleToTransfer);
 
     let marbleJSONAsBytes = Buffer.from(JSON.stringify(marbleToTransfer));
-    await stub.putState(marbleToTransfer.name, marbleJSONAsBytes); //rewrite the marble
+    await stub.putState(marbleToTransfer.name, marbleJSONAsBytes); // Rewrite the marble
 
     console.info('- end transferMarble (success)');
   }
 
   // ===== SOLUTION paintMarble======================================================
   // paint a marble by setting a new color
-  // Solution of LAB chaincode, write an invoke function
+  // Solution of LAB Chaincode, write an invoke function
   // ===========================================================
   async paintMarble(stub: any, args: string[]): Promise<Buffer> {
     if (args.length !== 2) {
-      throw new Error('Incorrect number of arguments. Expecting marblename and owner');
+      throw new Error('Incorrect number of arguments. Expecting marbleName and color');
     }
 
     let marbleName: string = args[0];
@@ -271,7 +257,7 @@ class Chaincode {
 
     console.info(marbleToPaint);
 
-    //Solution to bonus exercise
+    // Solution to bonus exercise
     if (marbleToPaint.color === newColor) {
       throw new Error(' Failed to paint marble with id: ' + marbleName + ' ' + newColor + '. The marble is already ' + marbleToPaint.color);
     }
@@ -279,15 +265,16 @@ class Chaincode {
     marbleToPaint.color = newColor; //change the color
 
     let marbleJSONAsBytes = Buffer.from(JSON.stringify(marbleToPaint));
-    await stub.putState(marbleName, marbleJSONAsBytes); //rewrite the marble
+    await stub.putState(marbleName, marbleJSONAsBytes); // Rewrite the marble
 
-    console.info('- end transferMarble (success)');
+    console.info('- end paintMarble (success)');
+
     return marbleJSONAsBytes;
   }
 
   // ===========================================================================================
   // getMarblesByRange performs a range query based on the start and end keys provided.
-
+  //
   // Read-only function results are not typically submitted to ordering. If the read-only
   // results are submitted to ordering, or if the query is used in an update transaction
   // and submitted to ordering, then the committing peers will re-execute to guarantee that
@@ -317,7 +304,7 @@ class Chaincode {
   // committing peers if the result set has changed between endorsement time and commit time.
   // Therefore, range queries are a safe option for performing update transactions based on query results.
   // ===========================================================================================
-  private async transferMarblesBasedOnColor(stub: any, args: any[]): Promise<any> {
+  private async transferMarblesBasedOnColor(stub: any, args: any[]): Promise<void> {
     if (args.length !== 2) {
       throw new Error('Incorrect number of arguments. Expecting color and owner');
     }
@@ -338,7 +325,6 @@ class Chaincode {
       }
       console.log(responseRange.value.key);
 
-      // let value = res.value.value.toString('utf8');
       let objectType: string;
       let attributes: string;
 
@@ -353,11 +339,8 @@ class Chaincode {
 
       // Now call the transfer function for the found marble.
       // Re-use the same function that is used to transfer individual marbles
-      // let response = await this.transferMarble(stub, [returnedMarbleName, newOwner]);
+      await this.transferMarble(stub, [returnedMarbleName, newOwner]);
     }
-
-    // let responsePayload = util.format('Transferred %s marbles to %s', color, newOwner);
-    // console.info('- end transferMarblesBasedOnColor: ' + responsePayload);
   }
 
   // ===== Example: Parameterized rich query =================================================
@@ -393,7 +376,7 @@ class Chaincode {
       throw new Error('Incorrect number of arguments. Expecting a color.');
     }
 
-    let color: string = args[0].toLowerCase();
+    let color: string = args[0];
 
     let queryString: QueryString = {
       selector: {
@@ -423,7 +406,7 @@ class Chaincode {
     try {
       queryString = JSON.parse(args[0]);
     } catch (err) {
-      throw new Error('Failed to decode JSON of queryString: ' + args[0] +  '. Reason: ' + err.message);
+      throw new Error('Failed to decode JSON of queryString: ' + args[0] + '. Reason: ' + err.message);
     }
 
     return await this.getQueryResultForQueryString(stub, queryString);
@@ -481,7 +464,6 @@ class Chaincode {
   // Result set is built and returned as a byte array containing the JSON results.
   // =========================================================================================
   private async getQueryResultForQueryString(stub: any, queryString: QueryString): Promise<Buffer> {
-
     console.info('- getQueryResultForQueryString queryString:\n' + JSON.stringify(queryString));
     let resultsIterator = await stub.getQueryResult(queryString);
 
@@ -491,10 +473,10 @@ class Chaincode {
   }
 
   private async getHistoryForMarble(stub: any, args: string[]) {
-
     if (args.length < 1) {
       throw new Error('Incorrect number of arguments. Expecting 1');
     }
+
     let marbleName: string = args[0];
     console.info('- start getHistoryForMarble: %s\n', marbleName);
 
