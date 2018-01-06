@@ -45,8 +45,9 @@ class Chaincode {
           payload = await this.transferMarble(stub, ret.params);
           break;
         case 'paintMarble':
-          payload = await this.paintMarble(stub, ret.params);
-          break;
+          throw new Error('Uncomment the code around line 48 in marbles_chaincode.ts');
+          // payload = await this.paintMarble(stub, ret.params);
+          // break;
         case 'getMarblesByRange':
           payload = await this.getMarblesByRange(stub, ret.params);
           break;
@@ -57,8 +58,9 @@ class Chaincode {
           payload = await this.queryMarblesByOwner(stub, ret.params);
           break;
         case 'queryMarblesByColor':
-          payload = await this.queryMarblesByColor(stub, ret.params);
-          break;
+          throw new Error('Uncomment the code around line 60 in marbles_chaincode.ts');
+          // payload = await this.queryMarblesByColor(stub, ret.params);
+          // break;
         case 'queryMarbles':
           payload = await this.queryMarbles(stub, ret.params);
           break;
@@ -228,48 +230,6 @@ class Chaincode {
     console.info('- end transferMarble (success)');
   }
 
-  // ===== SOLUTION paintMarble======================================================
-  // paint a marble by setting a new color
-  // Solution of LAB Chaincode, write an invoke function
-  // ===========================================================
-  async paintMarble(stub: any, args: string[]): Promise<Buffer> {
-    if (args.length !== 2) {
-      throw new Error('Incorrect number of arguments. Expecting marbleName and color');
-    }
-
-    let marbleName: string = args[0];
-    let newColor: string = args[1];
-    console.info('- start coloring marble ', marbleName, newColor);
-
-    let marbleAsBytes: Buffer = await stub.getState(marbleName);
-    if (!marbleAsBytes || !marbleAsBytes.toString()) {
-      throw new Error('marble does not exist');
-    }
-
-    let marbleToPaint: Marble;
-
-    try {
-      marbleToPaint = JSON.parse(marbleAsBytes.toString()); //unMarshal
-    } catch (err) {
-      throw new Error('Failed to decode JSON of: ' + marbleName + '. Reason: ' + err.message);
-    }
-
-    console.info(marbleToPaint);
-
-    // Solution to bonus exercise
-    if (marbleToPaint.color === newColor) {
-      throw new Error(' Failed to paint marble with id: ' + marbleName + ' ' + newColor + '. The marble is already ' + marbleToPaint.color);
-    }
-
-    marbleToPaint.color = newColor; //change the color
-
-    let marbleJSONAsBytes = Buffer.from(JSON.stringify(marbleToPaint));
-    await stub.putState(marbleName, marbleJSONAsBytes); // Rewrite the marble
-
-    console.info('- end paintMarble (success)');
-
-    return marbleJSONAsBytes;
-  }
 
   // ===========================================================================================
   // getMarblesByRange performs a range query based on the start and end keys provided.
@@ -366,27 +326,6 @@ class Chaincode {
     return await this.getQueryResultForQueryString(stub, queryString);
   }
 
-  // ===== SOLUTION: Query Marble By Color =================================================
-  // Gets all marbles of a certain color
-  // Solution of LAB chaincode, write a query function
-  // =========================================================================================
-  private async queryMarblesByColor(stub: any, args: string[]): Promise<Buffer> {
-    if (args.length !== 1) {
-      throw new Error('Incorrect number of arguments. Expecting a color.');
-    }
-
-    let color: string = args[0];
-
-    let queryString: QueryString = {
-      selector: {
-        docType: 'marble',
-        color: color,
-        owner: ''
-      }
-    };
-
-    return await this.getQueryResultForQueryString(stub, queryString);
-  }
 
   // ===== Example: Ad hoc rich query ========================================================
   // queryMarbles uses a query string to perform a query for marbles.

@@ -34,32 +34,17 @@ class App {
     // We can access the invoke and query functions via the Chaincode wrapper.
     // make sure to await the result, since it's an asynchronous function.
 
-    // 2. Initialize the marble here
-    let payload = await chaincode.invoke('initMarble', ['marble1', 'blue', '35', 'tom']);
-    console.log(payload);
+    // Lab 1 step 2. Initialize the marble here
+
 
     // We wait for the invoke to be completed. Normally you'd use events for this,
     // but we'll save that for some other time.
     await this.helper.sleep(8000);
 
-    // 1. Get marbles by range
-    payload = await chaincode.query('getMarblesByRange', ['', '']);
-    console.log(payload);
-
-    payload = await chaincode.query('readMarble', ['marble1']);
-    console.log(payload);
+    // Lab 1 step 1. Get marbles by range
 
     // Lab 2
-    payload = await chaincode.query('queryMarblesByColor', ['blue']);
-    console.log('\nThe result of the query queryMarblesByColor is: ', payload, '\n');
 
-    payload = await chaincode.invoke('paintMarble', ['marble1', 'green']);
-    console.log('\nThe result of the query paintMarble is: ', payload, '\n');
-
-    await this.helper.sleep(8000);
-
-    payload = await chaincode.query('readMarble', ['marble1']);
-    console.log('\nThe result of the query readMarble is: ', payload, '\n');
   }
 
   /**
