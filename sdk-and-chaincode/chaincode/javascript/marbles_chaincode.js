@@ -98,7 +98,6 @@ let Chaincode = class {
     marble.color = color;
     marble.size = size;
     marble.owner = owner;
-    marble.creationDate = stub.getTxTimestamp().seconds.low;
 
     // === Put marble as a JSON string in a buffer and save the marble to state ===
     await stub.putState(marbleName, Buffer.from(JSON.stringify(marble)));

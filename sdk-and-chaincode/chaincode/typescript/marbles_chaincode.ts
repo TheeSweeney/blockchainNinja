@@ -104,7 +104,6 @@ class Chaincode {
       color: args[1].toLowerCase(),
       size: parseInt(args[2]),
       owner: args[3].toLowerCase(),
-      creationDate: stub.getTxTimestamp().seconds.low
     };
 
     if (typeof marble.size !== 'number') {
