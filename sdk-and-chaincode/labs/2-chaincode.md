@@ -1,7 +1,7 @@
 # Lab 2: Chaincode
 
 ## Add a query
-> In this lab, you can complete two optional steps (at the beginning of this document).
+<!-- In this lab, you can complete two optional steps (at the beginning of this document).
 These optional steps will add node modules to your project. 
 Node modules are used to highlight stub functions in certain IDE's like WebStorm.
 
@@ -11,14 +11,19 @@ Use `npm run startHLFWithDevEnv` to start Hyperledger Fabric with the chaincode 
 `cd app/chaincodeDev`
 ##
 
+
 ##### ___OPTIONAL:___ Install the npm packages:
 `npm install`
 > We need to install the packages to get feedback from our IDE. 
 Functions written in the packages will be highlighted in the chaincode file after this
 ##
- 
+-->
+In this course we are going to be writing chaincode. We will have the choice to write chaincode in ___JavaScript___ or ___TypeScript___ 
+##
+##### Find the chaincode folder in your project:
+> you can find this under `app/chaincode/javascript` or `app/chaincode/typescript`
 ##### Open the file with the chaincode: 
-###### __"marbles_chaincode.js"__
+> ___"marbles_chaincode.js"___ or  ___"marbles_chaincode.ts"___
 ##
 
 ##### Find and read trough the following function: 
@@ -41,7 +46,7 @@ Try to add some marbles by doing some ___Invoke___ functions from the sdk, and t
 ## Add an Invoke
  
 ##### Open the file with the chaincode: 
-######__"marbles_chaincode.js"__
+> ___"marbles_chaincode.js"___ or  ___"marbles_chaincode.ts"___
 ##
 
 ##### Find and read trough the following function: 
