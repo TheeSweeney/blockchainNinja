@@ -206,31 +206,6 @@ organizations:
     peers:
       - peer0.org2.example.com
       - peer1.org2.example.com
-    # [Optional]. Certificate Authorities issue certificates for identification purposes in a Fabric based
-    # network. Typically certificates provisioning is done in a separate process outside of the
-    # runtime network. Fabric-CA is a special certificate authority that provides a REST APIs for
-    # dynamic certificate management (enroll, revoke, re-enroll). The following section is only for
-    # Fabric-CA servers.
-    certificateAuthorities:
-      - ca.org2.example.com
-
-    # [Optional]. If the application is going to make requests that are reserved to organization
-    # administrators, including creating/updating channels, installing/instantiating chaincodes, it
-    # must have access to the admin identity represented by the private key and signing certificate.
-    # Both properties can be the PEM string or local path to the PEM file. Note that this is mainly for
-    # convenience in development mode, production systems should not expose sensitive information
-    # this way. The SDK should allow applications to set the org admin identity via APIs, and only use
-    # this route as an alternative when it exists.
-    adminPrivateKey:
-      path: network/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/18a3da972567bc3013fd92abdcb8c9ddf8295b5d3ede0d58e5f64c029be6205a_sk
-    signedCert:
-      path: network/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
-
-  # the profile will contain public information about organizations other than the one it belongs to.
-  # These are necessary information to make transaction lifecycles work, including MSP IDs and
-  # peers with a public URL to send transaction proposals. The file will not contain private
-  # information reserved for members of the organization, such as admin key and certificate,
-  # fabric-ca registrar enroll ID and secret, etc.
 
 #
 # List of orderers to send transaction and channel create/update requests to. For the time

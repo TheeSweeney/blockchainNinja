@@ -43,26 +43,27 @@ Go to `app.ts` and change the '1' in the CONFIG_PATH to '2'. We now use configur
 > Bonus: check out the config files to see how much the SDK can actually take in. This makes our lives a lot easier!
 
 ## Create query function
-+ Add getMarblesByRange as the functionName for your query in the `app.ts` file (see `chaincode/marbles_chaincode.js` for all the queries).
++ In `app.ts`, on the bottom of the 'start' function, add a query using getMarblesByRange as the functionName and an empty array for the arguments (see `chaincode/javascript/marbles_chaincode.js` for all the queries). Assign the result to a new variable called _payload_.
 
-> You can find the query function with its parameters in `chaincode.ts`
+> You can find the query function with its parameters in `chaincode-wrapper.ts`
+
+If you run it like this, you will see an error that the getMarblesByRange function expects two parameters. If you look at the chaincode (`chaincode/javascript/marbles_chaincode.js`) you'll see that these parameters are used to do a stub.getStateByRange.
+
+> GetStateByRange expects two parameters, the start key and the end key. If you provide two empty strings, it will return all objects.
+
+Use two empty strings as the arguments to the function.
 
 + Run the application. It should show an empty array in the dev-Org2MSP container since no marble is added.
 You can view the logs in the dev-Org1MSP container in ___Kitematic___.
 
-Also view the logs in console by adding:
+Also view the query result in the console by adding:
 
     console.log(payload);
 
-to `app.ts`.
-
-*If you replace getMarblesByRange by readMarble with a specific marble name, you should get an error instead of an empty array since no Marble with this name exists*
-
-> CouchDB is a database management system.
-It speaks JSON natively and supports binary for all your data storage needs. It's good for chaincode because it provides query functionality and makes it easier to do analytics.
+*If you replace _getMarblesByRange_ by _readMarble_ with a specific marble name, you should get an error instead of an empty array since no Marble with this name exists*
 
 ## Create invoke function
-+ To be able to retrieve a marble, a Marble first needs to be added to state. This can be done with an invoke.
++ To be able to retrieve a marble, a marble first needs to be added to state. This can be done with an invoke.
 
 > You can find the place where we call the invoke function in `chaincode-wrapper.ts`. It is similar to your previously used query function.
 
@@ -72,11 +73,11 @@ It speaks JSON natively and supports binary for all your data storage needs. It'
 If a marble doesn't exist, it creates the marble object and converts it to JSON.
 It then saves the marble to state. You can then retrieve the marble with a query function.
 
-+ Invoke the function that adds your Marble
++ Right above the query that you just created, invoke the function that adds your marble.
 
-> The name of the invoke function can be found in `chaincode/marbles_chaincode.js`
+> The name of the invoke function and some example arguments can be found in `chaincode/marbles_chaincode.js`
 
-However, it seems that the invoke function that we have in our `chaincode-wrapper.ts` is not functioning properly. Something is missing.
+However, it seems that the invoke function that we have in our `chaincode-wrapper.ts` is not functioning properly. Something is missing, causing our marble not to be stored.
 
 > A fully functioning invoke function consists of the following:
 >  + Build request
@@ -85,17 +86,12 @@ However, it seems that the invoke function that we have in our `chaincode-wrappe
 >  + Send the responses to the ordering service so it can carve a block and send the results to the committers
 >  + return payload
 
-In order to create a fully functioning invoke function, build:
-+ Chaincode invoke request (hint: see query function)
-+ Create a broadcastResponse, which is sent by sendTransaction
+In order to create a fully functioning invoke function, make sure we send the transaction to the orderer by using the sendTransaction function of the SDK.
 
-> Hint: take a look at the instantiateOrUpgradeChaincode function
+> Hint: take a look at the instantiateOrUpgradeChaincode function. The broadcast works the same.
 
 ## Show that marbles are returning
 
-When you have added the invoke function and initMarble is working properly, you should be able to get a marble with the following function:
+When you have added the invoke function and initMarble is working properly, your getMarblesByRange function should return an array with your newly created marble.
 
-```typescript
-    let payload = await chaincode.query('readMarble', ['marble007']);
-    console.log(payload);
-```
+You can also add a query to 'readMarble' with the id of your marble as an argument.

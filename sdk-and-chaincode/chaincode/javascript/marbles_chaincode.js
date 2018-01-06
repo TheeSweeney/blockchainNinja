@@ -131,7 +131,7 @@ let Chaincode = class {
 
     let marbleAsbytes = await stub.getState(name); //get the marble from chaincode state
     if (!marbleAsbytes.toString()) {
-      throw new Error('Marble does not exist: ' + marbleName);
+      throw new Error('Marble does not exist: ' + name);
     }
 
     return marbleAsbytes;

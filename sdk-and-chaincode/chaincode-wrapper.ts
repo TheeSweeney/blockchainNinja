@@ -75,7 +75,10 @@ export class ChaincodeWrapper {
 
     // Send the responses to the ordering service so it can carve a block and send the results to the committers.
     try {
-      const broadcastResponse: BroadcastResponse = await this.channel.sendTransaction(<any>{
+      // const broadcastResponse: BroadcastResponse = {status: 'NOT IMPLEMENTED'};
+
+      // TODO: send transaction to orderer
+      const broadcastResponse = await this.channel.sendTransaction(<any> {
         proposalResponses: response[0],
         proposal: response[1],
         txId: request.txId
@@ -170,6 +173,10 @@ export class ChaincodeWrapper {
 
         if (errorMessage.indexOf('Failed to deserialize creator identity,') > -1) {
           console.log(logEnum.warningPrefix + '====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization? \x1b[0m');
+        }
+
+        if (errorMessage.indexOf('cannot get package for the chaincode to be upgraded') > -1) {
+          console.log(logEnum.warningPrefix + '====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization? \x1b[0m');
         }
       } else {
         console.log(`[${index}] ${logPrefix}. ${(response as ProposalResponse).response.status}`);
