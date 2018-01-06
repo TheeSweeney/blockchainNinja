@@ -333,12 +333,12 @@ let Chaincode = class {
       throw new Error('Incorrect number of arguments. Expecting owner name.');
     }
 
-    let owner = args[0].toLowerCase();
-    let queryString = {};
-
-    queryString.selector = {};
-    queryString.selector.docType = 'marble';
-    queryString.selector.owner = owner;
+    let queryString = {
+      selector: {
+        docType: 'marble',
+        owner: args[0].toLowerCase()
+      },
+    };
 
     return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
   }
@@ -352,11 +352,12 @@ let Chaincode = class {
       throw new Error('Incorrect number of arguments. Expecting a color.');
     }
 
-    let color = args[0];
-    let queryString = {};
-    queryString.selector = {};
-    queryString.selector.docType = 'marble';
-    queryString.selector.color = color;
+    let queryString = {
+        selector: {
+            docType: 'marble',
+            color: args[0]
+        },
+    };
 
     return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
   }

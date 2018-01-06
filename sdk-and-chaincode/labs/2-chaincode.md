@@ -1,23 +1,6 @@
 # Lab 2: Chaincode
 
 ## Add a query
-<!-- In this lab, you can complete two optional steps (at the beginning of this document).
-These optional steps will add node modules to your project. 
-Node modules are used to highlight stub functions in certain IDE's like WebStorm.
-
->If you complete these optional steps, develop from inside the `chaincodeDev/` folder. 
-Use `npm run startHLFWithDevEnv` to start Hyperledger Fabric with the chaincode written in __"chaincodeDev/marbles_chaincode.js"__
-#####  ___OPTIONAL:___ Go to the chaincodeDev folder inside of this project: 
-`cd app/chaincodeDev`
-##
-
-
-##### ___OPTIONAL:___ Install the npm packages:
-`npm install`
-> We need to install the packages to get feedback from our IDE. 
-Functions written in the packages will be highlighted in the chaincode file after this
-##
--->
 In this course we are going to be writing chaincode. We will have the choice to write chaincode in ___JavaScript___ or ___TypeScript___ 
 ##
 ##### Find the chaincode folder in your project:
@@ -32,9 +15,18 @@ In this course we are going to be writing chaincode. We will have the choice to 
  Only the results with a specified owner will be returned.
 ##
 
+> **Note:** this function leverages  _stub.getQueryResult_. This is a powerful method that allows us to create complex (or simple) queries for the world state database. It only works if you use CouchDB as your database (as opposed to the simple key value store LevelDB). 
+
 ##### Make a query function called queryMarblesByColor
  > Hint: if you get stuck compare your code to the `queryMarblesByOwner()` function.
 ##
+
+##### Make sure the new chaincode is installed on the peers.
+We made this easy for you: the code in `chaincode-wrapper.ts` compares the version number of the chaincode that we specify in the BasicChaincodeInfo object with the one that is installed. 
+
+Bump the version number with 1 and restart the app to install.
+
+You may see a warning; as Org1 we are not allowed to install chaincode for Org2. If you want to do it properly, change your identity by changing the CONFIG_PATH on the top of `app.ts`. This is however not needed for a working application. 
 
 ##### Call the queryMarblesByColor() function from the SDK
 > In our previous lab, we worked with the SDK. Here we learned how to call chaincode functions.
@@ -57,18 +49,18 @@ Try to add some marbles by doing some ___Invoke___ functions from the sdk, and t
 ##### Make an invoke function called paintMarble
 > this function should change the color of a certain marble to a color of your choice.
 
- > Hint: if you get stuck compare your code to the `transferMarble()` function.
+> Hint: if you get stuck compare your code to the `transferMarble()` function.
 
 ##### Call the paintMarble() function from the SDK
 > In our previous lab, we worked with the SDK. Here we learned how to call chaincode functions.
 Try to change some colors of marbles
 
->Hint: if you get stuck, do the first lab (in this directory). If you already did that, check out app.ts and search for ___Query___ or ___Invoke___. 
+> Hint: if you get stuck, do the first lab (in this directory). If you already did that, check out app.ts and search for ___Query___ or ___Invoke___. 
 ##
 
 ## Bonus exercise
 ##### Make sure that the chaincode throws an error if you try to paint the marble in the same color that it already has
 ###### example: If you paint a green marble green throw an error
 
-> call this function by using the sdk. try to get the error printed out in ___Kitematic___.
+> Call this function by using the sdk. Check your logs and the chaincode container in __Kitematic__ to see the error.
 

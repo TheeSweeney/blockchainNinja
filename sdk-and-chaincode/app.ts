@@ -21,7 +21,7 @@ class App {
 
     // Update the version number to deploy
     const mychaincode: BasicChaincodeInfo = {
-      chaincodeVersion: '4',
+      chaincodeVersion: '2',
       chaincodeId: 'mychaincode',
       chaincodePath: path.join(__dirname, 'chaincode', 'javascript'),
       chaincodeType: 'node' as ChaicodeType // Node not yet supported in the types file
@@ -48,6 +48,18 @@ class App {
 
     payload = await chaincode.query('readMarble', ['marble1']);
     console.log(payload);
+
+    // Lab 2
+    payload = await chaincode.query('queryMarblesByColor', ['blue']);
+    console.log('\nThe result of the query queryMarblesByColor is: ', payload, '\n');
+
+    payload = await chaincode.invoke('paintMarble', ['marble1', 'green']);
+    console.log('\nThe result of the query paintMarble is: ', payload, '\n');
+
+    await this.helper.sleep(8000);
+
+    payload = await chaincode.query('readMarble', ['marble1']);
+    console.log('\nThe result of the query readMarble is: ', payload, '\n');
   }
 
   /**

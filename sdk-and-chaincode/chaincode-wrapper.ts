@@ -26,12 +26,12 @@ export class ChaincodeWrapper {
   public async initialize(): Promise<any> {
     const instantiatedChaincode = await this.getInstantiatedChaincode();
 
+    console.log('Going to install chaincode...');
+    await this.install();
+
     if (this.isTheInstantiatedVersionUpToDate(instantiatedChaincode)) {
       return;
     }
-
-    console.log('Going to install chaincode...');
-    await this.install();
 
     if (typeof instantiatedChaincode !== 'undefined') {
       await this.upgrade();
@@ -165,6 +165,12 @@ export class ChaincodeWrapper {
       const errorMessage = (response as Error).message;
 
       if (errorMessage) {
+        if (errorMessage.indexOf('exists))') > -1) {
+          console.log('Chaincode exists.');
+
+          return;
+        }
+
         console.log(logEnum.warningPrefix + `[${index}] ${logPrefix}. Error: ${errorMessage} \x1b[0m`);
 
         if (errorMessage.indexOf('cannot retrieve package for chaincode') > -1) {
@@ -177,6 +183,10 @@ export class ChaincodeWrapper {
 
         if (errorMessage.indexOf('cannot get package for the chaincode to be upgraded') > -1) {
           console.log(logEnum.warningPrefix + '====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization? \x1b[0m');
+        }
+
+        if (errorMessage.indexOf('chaincode fingerprint mismatch data mismatch') > -1) {
+          console.log(logEnum.warningPrefix + '====> You\'re trying to install a different chaincode with the same name and version. Did you make changes to the code before changing your organization? Fix by bumping the version up one number. \x1b[0m');
         }
       } else {
         console.log(`[${index}] ${logPrefix}. ${(response as ProposalResponse).response.status}`);
