@@ -10,6 +10,11 @@ and a couchDB for each peer.
 + !! For now, do not install node modules in the chaincode folder.
 + Start the blockchain with `npm run startHLF`
 + Check if all containers are up and running: use ___Kitematic___ (or, if you don't have it, `docker ps -a`).
++ If you encounter the error:
+>Error when running ’npm run startHLF’.
+ERROR: Network SampleConsortium declared as external, but could not be found.
+
+   + Run `docker network create SampleConsortium`. This should create the network and fix this problem.
 
 **Note:** If you ever stop the network do `npm run tearDownHLF` to make sure there are no old containers left. Not starting with a clean slate can lead to hard to find bugs.
 
