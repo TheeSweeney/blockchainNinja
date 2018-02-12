@@ -18,8 +18,8 @@
     "url": "git@github.ibm.com:CICBlockchain/ninja-course.git"
   },
   "dependencies": {
-    "fabric-ca-client": "1.1.0-preview",
-    "fabric-client": "1.1.0-preview",
+    "fabric-ca-client": "1.1.0-alpha",
+    "fabric-client": "1.1.0-snapshot.59",
     "ts-node": "3.3.0"
   },
   "devDependencies": {

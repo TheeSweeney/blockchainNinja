@@ -8,7 +8,7 @@ import * as path from 'path';
  * In this line, the organisation that starts the blockchain is set
  * change org2 to org1 and run the start script again to start the blockchain as the other organisation.
  * */
-const CONFIG_PATH = 'network/network.localhost.org1.yaml';
+const CONFIG_PATH = 'network/network.localhost.org2.yaml';
 
 class App {
   private helper = new Helper();
@@ -28,7 +28,7 @@ class App {
       chaincodeVersion: '2',
       chaincodeId: 'mychaincode',
       chaincodePath: path.join(__dirname, 'chaincode', 'javascript'),
-      chaincodeType: 'node' as ChaicodeType // Node not yet supported in the types file
+      chaincodeType: 'node'
     };
 
     // Install and instantiate chaincode
@@ -56,9 +56,9 @@ class App {
    * Setting the user context to an admin user.
    */
   private async initializeClient(): Promise<Client> {
-    const client = (Client as any).loadFromConfig(CONFIG_PATH);
+    const client = Client.loadFromConfig(CONFIG_PATH);
     await client.initCredentialStores();
-    await client.setUserContext({username: 'admin', password: 'adminpw'});
+    await (client as any).setUserContext({username: 'admin', password: 'adminpw'}); // https://fabric-sdk-node.github.io/global.html#UserNamePasswordObject
 
     return client;
   }

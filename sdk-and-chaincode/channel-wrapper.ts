@@ -27,7 +27,7 @@ export class ChannelWrapper {
   }
 
   public get channel(): Channel {
-    return (this.client as any).getChannel(this.channelName);
+    return this.client.getChannel(this.channelName);
   }
 
   public async create(): Promise<void> {
@@ -36,12 +36,12 @@ export class ChannelWrapper {
     const signatures = [this.client.signChannelConfig(config)];
     console.log('Signed channel configuration');
 
-    const request: ChannelRequest | any = {
-      config,
-      signatures,
-      name : this.channelName,
-      orderer : 'orderer.example.com',
-      txId  : (this.client as any).newTransactionID(true)
+    const request: ChannelRequest = {
+      config: config,
+      signatures: signatures,
+      name: this.channelName,
+      orderer: this.channel.getOrderers()[0],
+      txId: this.client.newTransactionID(true)
     };
 
     try {
@@ -60,12 +60,15 @@ export class ChannelWrapper {
   }
 
   public async join(): Promise<void> {
-    const channel = this.channel;
+    const genesisBlock = await this.channel.getGenesisBlock({
+      txId: this.client.newTransactionID(),
+      orderer: this.channel.getOrderers()[0]
+    });
 
     let proposal: JoinChannelRequest = {
-      targets: (this.client as any).getPeersForOrg(),
-      block: await channel.getGenesisBlock({txId: (this.client as any).newTransactionID()}),
-      txId: (this.client as any).newTransactionID(true)
+      targets: this.client.getPeersForOrg(''),
+      block: genesisBlock,
+      txId: this.client.newTransactionID(true)
     };
 
     const response: any = await this.channel.joinChannel(proposal);

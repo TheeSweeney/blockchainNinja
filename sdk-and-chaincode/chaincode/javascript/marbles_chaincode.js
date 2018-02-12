@@ -88,7 +88,7 @@ let Chaincode = class {
     // ==== Check if marble already exists ====
     let marbleState = await stub.getState(marbleName);
     if (marbleState.toString()) {
-      throw new Error('Marble "' + marble.name + '" already exists');
+      throw new Error('Marble "' + marbleName + '" already exists');
     }
 
     // ==== Create marble object and marshal to JSON ====
