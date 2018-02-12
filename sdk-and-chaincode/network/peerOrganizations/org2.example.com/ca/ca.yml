@@ -8,9 +8,9 @@ services:
     environment:
       - FABRIC_CA_SERVER_CA_NAME=ca.org2.example.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/e3ba792f276d3c1ff164fe0f62edd2f0289e78028acf4e2cd10c8f045129daf3_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4cc0b2cc2eda88fb5c63db4fc1dc12fb2ab32bd27cb6683614e92dca81e48b97_sk
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
-      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/e3ba792f276d3c1ff164fe0f62edd2f0289e78028acf4e2cd10c8f045129daf3_sk
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4cc0b2cc2eda88fb5c63db4fc1dc12fb2ab32bd27cb6683614e92dca81e48b97_sk
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
       - ./:/etc/hyperledger/fabric-ca-server-config

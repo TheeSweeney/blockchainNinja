@@ -1,7 +1,7 @@
 version: '2'
 services:
   peer:
-    image: hyperledger/fabric-peer:x86_64-1.1.0-preview
+    image: hyperledger/fabric-peer:x86_64-1.1.0-alpha
     environment:
       - CORE_PEER_LOGGING_LEVEL=DEBUG
       - CORE_PEER_ENDORSER_ENABLED=true
@@ -23,7 +23,7 @@ services:
     volumes:
       - /var/run/:/host/var/run/
   orderer:
-    image: hyperledger/fabric-orderer:x86_64-1.1.0-preview
+    image: hyperledger/fabric-orderer:x86_64-1.1.0-alpha
     environment:
       - ORDERER_GENERAL_LOGLEVEL=debug
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
@@ -37,7 +37,7 @@ services:
     working_dir: /fabric
     command: orderer
   ca:
-    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    image: hyperledger/fabric-ca:x86_64-1.1.0-alpha
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_TLS_ENABLED=true

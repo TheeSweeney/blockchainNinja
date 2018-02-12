@@ -190,7 +190,7 @@ organizations:
     # this way. The SDK should allow applications to set the org admin identity via APIs, and only use
     # this route as an alternative when it exists.
     adminPrivateKey:
-      path: network/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/9c25de2f97637f2f7e5bbaebd9d964646eb97ac0761f56981ad74fe2b3d23c77_sk
+      path: network/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/e439a2159ad34180c38e6427b7a6c43a7cdae9c855719ddc4ff3c5cd3f90ce60_sk
     signedCert:
       path: network/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem
 

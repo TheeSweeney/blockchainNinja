@@ -2,7 +2,7 @@ version: '2'
 services:
   cli:
     container_name: cli-peer0.org2.example.com
-    image: hyperledger/fabric-tools:x86_64-1.1.0-preview
+    image: hyperledger/fabric-tools:x86_64-1.1.0-alpha
     tty: true
     extends:
       file: ../../../../shared/base.yml
