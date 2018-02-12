@@ -199,7 +199,7 @@ class Chaincode {
   // ===========================================================
   // transfer marble by setting a new owner for the marble
   // ===========================================================
-  private async transferMarble(stub: any, args: string[]): Promise<void> {
+  private async transferMarble(stub: any, args: string[]): Promise<Buffer> {
     if (args.length !== 2) {
       throw new Error('Incorrect number of arguments. Expecting marbleName and owner');
     }
@@ -228,8 +228,9 @@ class Chaincode {
     await stub.putState(marbleToTransfer.name, marbleJSONAsBytes); // Rewrite the marble
 
     console.info('- end transferMarble (success)');
-  }
 
+    return marbleJSONAsBytes;
+  }
 
   // ===========================================================================================
   // getMarblesByRange performs a range query based on the start and end keys provided.

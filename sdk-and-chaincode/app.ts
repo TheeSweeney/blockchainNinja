@@ -4,6 +4,10 @@ import {ChannelWrapper} from './channel-wrapper';
 import {Helper} from './helper';
 import * as path from 'path';
 
+/**
+ * In this line, the organisation that starts the blockchain is set
+ * change org2 to org1 and run the start script again to start the blockchain as the other organisation.
+ * */
 const CONFIG_PATH = 'network/network.localhost.org2.yaml';
 
 class App {
