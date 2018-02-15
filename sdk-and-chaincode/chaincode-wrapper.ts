@@ -45,7 +45,7 @@ export class ChaincodeWrapper {
     this.getPayloadFromResponse('Install chaincode', response);
   }
 
-  public async invoke(functionName: string, args: string[]): Promise<any> {
+  public async invoke(functionName: string, args: string[]): Promise<string> {
     const logPrefix = `Invoke: ${functionName} ${args}`;
 
     // We only want to send this request to endorsing peers.
