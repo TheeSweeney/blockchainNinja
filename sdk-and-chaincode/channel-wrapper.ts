@@ -13,7 +13,7 @@ export class ChannelWrapper {
     if (firstRun) {
       await this.create();
     } else {
-      console.log('Assuming channel is already there (firstRun set to false).');
+      this.helper.debug('Assuming channel is already created (firstRun set to false).');
     }
 
     // Initialize the channel representation for the sdk.
@@ -22,7 +22,7 @@ export class ChannelWrapper {
     if (firstRun) {
       await this.join();
     } else {
-      console.log('Assuming channel is already joined (firstRun set to false).');
+      this.helper.debug('Assuming channel is already joined (firstRun set to false).');
     }
   }
 
@@ -34,7 +34,7 @@ export class ChannelWrapper {
     const envelope_bytes = fs.readFileSync(path.join(__dirname, 'network/shared/channel-artifacts/channel.tx'));
     const config =  this.client.extractChannelConfig(envelope_bytes);
     const signatures = [this.client.signChannelConfig(config)];
-    console.log('Signed channel configuration');
+    this.helper.debug('Signed channel configuration');
 
     const request: ChannelRequest = {
       config: config,
@@ -45,14 +45,14 @@ export class ChannelWrapper {
     };
 
     try {
-      console.log('Sending create channel request to orderer');
+      this.helper.debug('Sending create channel request to orderer');
       const response = await this.client.createChannel(request);
 
-      console.log('Create channel', response.status);
+      this.helper.debug(`Create channel ${response.status}`);
       await this.helper.sleep(5000);
     } catch (error) {
       if (error.message === 'BAD_REQUEST') {
-        console.log('Got error when trying to create channel. Already exists?');
+        this.helper.debug('Got error when trying to create channel. Already exists?');
       } else {
         throw error;
       }
@@ -78,7 +78,7 @@ export class ChannelWrapper {
 
       if (errorMessage) {
         if (errorMessage.indexOf('Cannot create ledger from genesis block, due to LedgerID already exists')) {
-          console.log('Peer has already joined this channel.');
+          this.helper.debug('Peer has already joined this channel.');
         } else if (errorMessage.indexOf('Failed to deserialize creator identity') > -1) {
           throw new Error(`Join channel error (are you referring to the right peer?) - ${errorMessage}`); // TODO check what this means
         }

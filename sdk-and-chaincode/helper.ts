@@ -15,4 +15,8 @@ export class Helper {
   public error(message: string): void {
     console.error(`\x1b[31m[Error] ${message} \x1b[0m`);
   }
+
+  public debug(message: string): void {
+    console.log(message);
+  }
 }

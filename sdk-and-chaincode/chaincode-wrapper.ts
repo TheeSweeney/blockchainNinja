@@ -21,7 +21,7 @@ export class ChaincodeWrapper {
   public async initialize(): Promise<any> {
     const instantiatedChaincode = await this.getInstantiatedChaincode();
 
-    console.log('Going to install chaincode...');
+    this.helper.debug('Going to install chaincode...');
     await this.install();
 
     if (this.isTheInstantiatedVersionUpToDate(instantiatedChaincode)) {
@@ -42,7 +42,7 @@ export class ChaincodeWrapper {
     };
 
     const response = await this.client.installChaincode(request);
-    this.getPayloadFromResponse('Install chaincode', response);
+    this.getPayloadFromResponseAndLogAnyErrors('Install chaincode', response);
   }
 
   public async invoke(functionName: string, args: string[]): Promise<string> {
@@ -50,7 +50,7 @@ export class ChaincodeWrapper {
 
     // We only want to send this request to endorsing peers.
     const targets = this.getChannelEndorsers();
-    console.log(`Invoke targets: ${targets.map((peer: any) => peer._name).join(', ')}`);
+    this.helper.debug(`Invoke targets: ${targets.map((peer: any) => peer._name).join(', ')}`);
 
     // Build the request
     const request: ChaincodeInvokeRequest = {
@@ -66,7 +66,7 @@ export class ChaincodeWrapper {
     let invokeResult: any;
 
     // We keep the payload (return value) of the simulation to return in the end
-    invokeResult = this.getPayloadFromResponse(logPrefix, response);
+    invokeResult = this.getPayloadFromResponseAndLogAnyErrors(logPrefix, response);
 
     // Send the responses to the ordering service so it can carve a block and send the results to the committers.
     try {
@@ -74,7 +74,7 @@ export class ChaincodeWrapper {
 
       // TODO: send transaction to orderer
 
-      console.log(`${logPrefix}. Broadcast ${broadcastResponse.status}`);
+      this.helper.debug(`${logPrefix}. Broadcast ${broadcastResponse.status}`);
 
       return invokeResult;
     } catch (err) {
@@ -98,7 +98,7 @@ export class ChaincodeWrapper {
 
     // Return the payload (return value) of the function execution. Note that we don't send anything to the orderer,
     // so there is no transaction added to the ledger.
-    return this.getPayloadFromResponse(`Query: ${functionName} ${args}`, response);
+    return this.getPayloadFromResponseAndLogAnyErrors(`Query: ${functionName} ${args}`, response);
   }
 
   public async instantiate(): Promise<any> {
@@ -110,7 +110,7 @@ export class ChaincodeWrapper {
   }
 
   private async instantiateOrUpgradeChaincode(instantiateOrUpgrade: 'instantiate' | 'upgrade'): Promise<any> {
-    console.log(`Going to ${instantiateOrUpgrade} chaincode (this may take a minute)...`);
+    this.helper.debug(`Going to ${instantiateOrUpgrade} chaincode (this may take a minute)...`);
 
     const proposal: ChaincodeInstantiateUpgradeRequest | any = {
       txId: this.client.newTransactionID(true),
@@ -125,7 +125,7 @@ export class ChaincodeWrapper {
       response = await this.channel.sendUpgradeProposal(proposal);
     }
 
-    this.getPayloadFromResponse(`Chaincode ${instantiateOrUpgrade}`, response);
+    this.getPayloadFromResponseAndLogAnyErrors(`Chaincode ${instantiateOrUpgrade}`, response);
 
     const broadcastResponse = await this.channel.sendTransaction({
       proposalResponses: response[0],
@@ -133,7 +133,7 @@ export class ChaincodeWrapper {
       txId: proposal.txId
     });
 
-    console.log(`Chaincode ${instantiateOrUpgrade} broadcast ${broadcastResponse.status}`);
+    this.helper.debug(`Chaincode ${instantiateOrUpgrade} broadcast ${broadcastResponse.status}`);
 
     await this.helper.sleep(10000);
   }
@@ -150,7 +150,7 @@ export class ChaincodeWrapper {
    * Function to parse the payload (return value) out of the proposal response. This is a naive approach that doesn't
    * handle errors and doesn't care if the responses are all the same.
    */
-  private getPayloadFromResponse(logPrefix: string, proposalResponseObject: ProposalResponseObject): string {
+  private getPayloadFromResponseAndLogAnyErrors(logPrefix: string, proposalResponseObject: ProposalResponseObject): string {
     let payload = '';
 
     proposalResponseObject[0].forEach((response: ProposalResponse | Error, index: number) => {
@@ -158,7 +158,7 @@ export class ChaincodeWrapper {
 
       if (errorMessage) {
         if (errorMessage.indexOf('exists))') > -1) {
-          console.log('Chaincode exists.');
+          this.helper.debug('Chaincode exists.');
 
           return;
         }
@@ -170,18 +170,18 @@ export class ChaincodeWrapper {
         }
 
         if (errorMessage.indexOf('Failed to deserialize creator identity,') > -1) {
-          this.helper.warn('====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization? \x1b[0m');
+          this.helper.warn('====> This means the peer has not joined the channel yet. Maybe you should run the app as the other organization?');
         }
 
         if (errorMessage.indexOf('cannot get package for the chaincode to be upgraded') > -1) {
-          this.helper.warn('====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization? \x1b[0m');
+          this.helper.warn('====> This means the chaincode is not installed yet on the peer. Maybe you should run the app as the other organization?');
         }
 
         if (errorMessage.indexOf('chaincode fingerprint mismatch data mismatch') > -1) {
-          this.helper.warn('====> You\'re trying to install a different chaincode with the same name and version. Did you make changes to the code before changing your organization? Fix by bumping the version up one number. \x1b[0m');
+          this.helper.warn('====> You\'re trying to install a different chaincode with the same name and version. Did you make changes to the code before changing your organization? Fix by bumping the version up one number.');
         }
       } else {
-        console.log(`[${index}] ${logPrefix}. ${(response as ProposalResponse).response.status}`);
+        this.helper.debug(`[${index}] ${logPrefix}. ${(response as ProposalResponse).response.status}`);
         payload = (response as ProposalResponse).response.payload.toString('utf8');
       }
     });
@@ -204,7 +204,7 @@ export class ChaincodeWrapper {
   private isTheInstantiatedVersionUpToDate(instantiatedChaincode: ChaincodeInfo | undefined): boolean {
     const itsUpToDate = !!instantiatedChaincode && instantiatedChaincode.version === this.basicChaincodeInfo.chaincodeVersion;
     if (itsUpToDate) {
-      console.log('Chaincode is up to date.');
+      this.helper.debug('Chaincode is up to date.');
     }
 
     return itsUpToDate;
