@@ -8,6 +8,7 @@
     "startHLF": "cd network && docker-compose up; cd .. && npm run tearDownHLF",
     "tearDownHLF": "rm -rf /tmp/hfc-kvs /tmp/hfc-cvs; cd network && docker-compose down; cd .. && npm run clean",
     "clean": "docker rm -f -v $(docker ps -a | grep 'dev-' | awk '{print $1}') 2>/dev/null; docker rmi $(docker images | grep 'dev-' | awk '{print $1}') 2>/dev/null; true",
+    "clean-docker": "docker rm -f `docker ps -aq`",
     "startApp": "HFC_LOGGING='{\"crit\":\"console\"}' node index.js",
     "debugApp": "HFC_LOGGING='{\"debug\":\"console\"}' node index.js"
   },
