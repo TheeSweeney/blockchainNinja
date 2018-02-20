@@ -23,11 +23,11 @@ In this exercise you will perform transactions using a group of people. Everyone
 As a client you have different cards which you will pass to the SDK in order to perform them on the Blockchain network. These cards could have either a transaction or a query written on them. Your task is to send these cards to the SDK in order to query the network or perform a transaction.
 
 **Transactions / Queries**
-- Transaction: Change the color to green!
-- Transaction: Change the color to red!
-- Transaction: Change the color to orange!
-- Transaction: Change the color to blue!
-- Transaction: Change the color to purple!
+- Transaction: Change the color to _green_!
+- Transaction: Change the color to _red_!
+- Transaction: Change the color to _orange_!
+- Transaction: Change the color to _blue_!
+- Transaction: Change the color to _purple_!
 - Query: What is the light color?
 
 ### ROLE: SDK
@@ -57,9 +57,9 @@ When you get a new block from the endorser you can put it on top of your other b
 When you get a query from the SDK, your task is to write down the current color in your ledger on the card and pass it back to the SDK.
 
 **Chaincode rules**
-- Light can only be green, orange or red
-- Light can only go from green -> orange -> red -> green
-- Light can NOT go from red to orange, green to red or orange to green!
+- Light can only be _green_, _orange_ or _red_
+- Light can only go from _green_ -> _orange_ -> _red_ -> _green_
+- Light can NOT go from _red_ to _orange_, _green_ to _red_ or _orange_ to _green_!
 
 
 ### ROLE: Committing Peers
@@ -68,7 +68,7 @@ As an committing peer you two multiple tasks:
 - Handle incoming queries
 
 #### Add new blocks
-When you get a new block from the endorser you can put it on top of your other blocks. The current light color is the one that's written on the latest block.
+When you get a new block from the orderers you can put it on top of your other blocks. The current light color is the one that's written on the latest block.
 
 #### Handle incoming queries
 When you get a query from the SDK, your task is to write down the current color in your ledger on the card and pass it back to the SDK.
@@ -88,5 +88,5 @@ To set up the exercise print out the role descriptions seperately.
 - X Clients
 
 Write down the different queries and transactions on post-its and hand them out to the clients.
-Write down the number one + "green" on post-its of a different color and give one of these to each of the peers, these are the blocks.
+Write down the number one + _green_ on post-its of a different color and give one of these to each of the peers, these are the blocks.
 Give the orderers the same color post-its as used for the blocks, but leave them blank.
