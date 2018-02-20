@@ -13,7 +13,7 @@ export class ChannelWrapper {
     if (firstRun) {
       await this.create();
     } else {
-      console.log('Assuming channel is already there (firstRun set to false).');
+      this.helper.debug('Assuming channel is already created (firstRun set to false).');
     }
 
     // Initialize the channel representation for the sdk.
@@ -22,37 +22,37 @@ export class ChannelWrapper {
     if (firstRun) {
       await this.join();
     } else {
-      console.log('Assuming channel is already joined (firstRun set to false).');
+      this.helper.debug('Assuming channel is already joined (firstRun set to false).');
     }
   }
 
   public get channel(): Channel {
-    return (this.client as any).getChannel(this.channelName);
+    return this.client.getChannel(this.channelName);
   }
 
   public async create(): Promise<void> {
     const envelope_bytes = fs.readFileSync(path.join(__dirname, 'network/shared/channel-artifacts/channel.tx'));
     const config =  this.client.extractChannelConfig(envelope_bytes);
     const signatures = [this.client.signChannelConfig(config)];
-    console.log('Signed channel configuration');
+    this.helper.debug('Signed channel configuration');
 
-    const request: ChannelRequest | any = {
-      config,
-      signatures,
-      name : this.channelName,
-      orderer : 'orderer.example.com',
-      txId  : (this.client as any).newTransactionID(true)
+    const request: ChannelRequest = {
+      config: config,
+      signatures: signatures,
+      name: this.channelName,
+      orderer: this.channel.getOrderers()[0],
+      txId: this.client.newTransactionID(true)
     };
 
     try {
-      console.log('Sending create channel request to orderer');
+      this.helper.debug('Sending create channel request to orderer');
       const response = await this.client.createChannel(request);
 
-      console.log('Create channel', response.status);
+      this.helper.debug(`Create channel ${response.status}`);
       await this.helper.sleep(5000);
     } catch (error) {
       if (error.message === 'BAD_REQUEST') {
-        console.log('Got error when trying to create channel. Already exists?');
+        this.helper.debug('Got error when trying to create channel. Already exists?');
       } else {
         throw error;
       }
@@ -60,12 +60,15 @@ export class ChannelWrapper {
   }
 
   public async join(): Promise<void> {
-    const channel = this.channel;
+    const genesisBlock = await this.channel.getGenesisBlock({
+      txId: this.client.newTransactionID(),
+      orderer: this.channel.getOrderers()[0]
+    });
 
     let proposal: JoinChannelRequest = {
-      targets: (this.client as any).getPeersForOrg(),
-      block: await channel.getGenesisBlock({txId: (this.client as any).newTransactionID()}),
-      txId: (this.client as any).newTransactionID(true)
+      targets: this.client.getPeersForOrg(''),
+      block: genesisBlock,
+      txId: this.client.newTransactionID(true)
     };
 
     const response: any = await this.channel.joinChannel(proposal);
@@ -75,7 +78,7 @@ export class ChannelWrapper {
 
       if (errorMessage) {
         if (errorMessage.indexOf('Cannot create ledger from genesis block, due to LedgerID already exists')) {
-          console.log('Peer has already joined this channel.');
+          this.helper.debug('Peer has already joined this channel.');
         } else if (errorMessage.indexOf('Failed to deserialize creator identity') > -1) {
           throw new Error(`Join channel error (are you referring to the right peer?) - ${errorMessage}`); // TODO check what this means
         }

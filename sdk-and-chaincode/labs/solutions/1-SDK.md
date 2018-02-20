@@ -36,7 +36,9 @@ And the bottom part of the _invoke_ function in `chaincode-wrapper.ts`:
 
       return invokeResult;
     } catch (err) {
-      return '\n' + logEnum.errorPrefix + 'Error Occurred. Reason: ' + err.message + '\x1b[0m';
+      this.helper.error(`Error Occurred. Reason: ${err.message}`);
+
+      return 'ERROR';
     }
 ``` 
 
