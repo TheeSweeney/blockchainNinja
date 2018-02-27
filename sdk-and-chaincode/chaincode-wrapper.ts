@@ -70,9 +70,12 @@ export class ChaincodeWrapper {
 
     // Send the responses to the ordering service so it can carve a block and send the results to the committers.
     try {
-      const broadcastResponse: BroadcastResponse = {status: 'NOT IMPLEMENTED'};
 
-      // TODO: send transaction to orderer
+      const broadcastResponse = await this.channel.sendTransaction({
+        proposalResponses: response[0],
+        proposal: response[1],
+        txId: request.txId
+      })
 
       this.helper.debug(`${logPrefix}. Broadcast ${broadcastResponse.status}`);
 

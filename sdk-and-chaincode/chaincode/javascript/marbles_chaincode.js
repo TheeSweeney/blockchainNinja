@@ -300,6 +300,21 @@ let Chaincode = class {
     return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
   }
 
+  async queryMarblesByOwner(stub, args) {
+    if (args.length !== 1) {
+      throw new Error('Incorrect number of arguments. Expecting color name.');
+    }
+
+    let queryString = {
+      selector: {
+        docType: 'marble',
+        owner: args[0].toLowerCase()
+      },
+    };
+
+    return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
+  }
+
 
   // ===== Example: Ad hoc rich query ========================================================
   // queryMarbles uses a query string to perform a query for marbles.
