@@ -300,7 +300,7 @@ let Chaincode = class {
     return await this.getQueryResultForQueryString.apply(this, [stub, JSON.stringify(queryString)]);
   }
 
-  async queryMarblesByOwner(stub, args) {
+  async queryMarblesByColor(stub, args) {
     if (args.length !== 1) {
       throw new Error('Incorrect number of arguments. Expecting color name.');
     }
@@ -308,7 +308,7 @@ let Chaincode = class {
     let queryString = {
       selector: {
         docType: 'marble',
-        owner: args[0].toLowerCase()
+        owner: args[1].toLowerCase()
       },
     };
 
