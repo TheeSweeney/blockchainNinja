@@ -25,7 +25,7 @@ class App {
 
     // Update the version number to deploy
     const mychaincode: BasicChaincodeInfo = {
-      chaincodeVersion: '3',
+      chaincodeVersion: '5',
       chaincodeId: 'mychaincode',
       chaincodePath: path.join(__dirname, 'chaincode', 'javascript'),
       chaincodeType: 'node'
@@ -48,11 +48,11 @@ class App {
 
     // We wait for the invoke to be completed. Normally you'd use events for this,
     // but we'll save that for some other time.
-    // await this.helper.sleep(8000);
+    await this.helper.sleep(8000);
 
     // Lab 1 step 1. Get marbles by range
 
-    var payload = await chaincode.query("queryMarblesByOwner", ["Brian"]);
+    var payload = await chaincode.query("queryMarblesByColor", ["blue"]);
 
     console.log("here->", payload)
 

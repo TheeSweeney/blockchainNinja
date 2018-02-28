@@ -308,7 +308,7 @@ let Chaincode = class {
     let queryString = {
       selector: {
         docType: 'marble',
-        owner: args[1].toLowerCase()
+        color: args[0].toLowerCase()
       },
     };
 
